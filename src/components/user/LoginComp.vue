@@ -3,85 +3,83 @@
     <v-sheet :style="{ height: 'auto', width: '30vw'}" id="center" rounded >
         <div id="login">Login</div>
 
-      <v-form
-        v-model="form"
-        @submit.prevent="onSubmit"
-        id="loginForm"
-      >
-        <v-text-field
-          v-model="email"
-          :readonly="loading"
-          :rules="emailRules"
-          class="mb-2"
-          clearable
-          label="Email"
-        ></v-text-field>
-
-        <v-text-field
-          v-model="password"
-          :readonly="loading"
-          :rules="nameRules"
-          clearable
-          hide-details="true"
-          label="Password"
-          placeholder="Enter your password"
-        ></v-text-field>
-
-        <br>
-
-        <v-btn
-          :disabled="!form"
-          :loading="loading"
-          block
-          color="success"
-          size="large"
-          type="submit"
-          variant="elevated"
+        <v-form
+            v-model="form"
+            @submit.prevent="onSubmit"
+            id="loginForm"
         >
-          Sign In
-        </v-btn>
-      </v-form>
-    </v-sheet>
-    
+            <v-text-field
+            v-model="email"
+            :readonly="loading"
+            :rules="emailRules"
+            class="mb-2"
+            clearable
+            label="Email"
+            ></v-text-field>
 
-    <div id="box">
+            <v-text-field
+            v-model="password"
+            :readonly="loading"
+            :rules="nameRules"
+            clearable
+            label="Password"
+            placeholder="Enter your password"
+            :append-icon="show ?'mdi-eye':'mdi-eye-off'"   
+                @click:append="show=!show">
+            ></v-text-field>
 
-        
-        
-    
-        <!-- <div id="form">
-            // Email input
-            <div id="emailBox">
-                <input type="text" id="email" name="email" placeholder="E-mail" ref="email_signin">
-            </div>
-    
-            Password input
-            <div id="passwordBox1">
-                <input type="text" id="password" name="password" placeholder="Password" ref="password_signin" @input="passwordChecker">
-            </div>
+            <br>
 
-            <div id="errorMessages">
-                <div v-if="emailNotValidated">E-mail is not a valid e-mail address</div>
-                <div v-if="WrongInfo">Email and password doesn't match</div>
-            </div>
+            <v-btn
+            :disabled="!form"
+            :loading="loading"
+            block
+            color="success"
+            size="large"
+            type="submit"
+            variant="elevated"
+            @click="login"
+            >
+            Sign In
+            </v-btn>
+        </v-form>
 
-            Login button
-            <input type="submit" id="loginButton" name="login_Submit" value="Sign in" @click="login">
-        </div> -->
-                
+        <br><br>
+
         <div id="social">
             <span class="loginWith">Sign in with:</span><br>
     
             <!-- Facebook login button -->
             <div class="social-signin_facebook" @click="signInWithFacebook">
-                <img src="../assets/photos/facebook_logo-transparent.png" alt="facebook_logo">
+                <img src="../../assets/photos/facebook_logo-transparent.png" alt="facebook_logo">
             </div>
                 
             <!-- Google login button -->
             <div class="social-signin_google" @click="signInWithGoogle">
-                <img src="../assets/photos/google_logo.png" alt="google_logo">
+                <img src="../../assets/photos/google_logo.png" alt="google_logo">
             </div>
         </div>
+        <v-img
+        :width="300"
+        aspect-ratio="1/1"
+        cover
+        src="../../assets/photos/Lofoten.png"
+        ></v-img>
+
+        <v-img
+        :width="300"
+        aspect-ratio="1/1"
+        cover
+        src="../../assets/photos/google_logo.png"
+        ></v-img>
+    </v-sheet>
+    
+
+    <div id="box">
+
+
+                
+        
   
         <!-- Registration link -->
         <div id="registerLink">
@@ -132,7 +130,12 @@
     
             // Handle user login
             login() {
-                
+                if (!this.form) return
+
+                this.loading = true
+
+                setTimeout(() => (this.loading = false), 2000)
+
                 const email_login = this.email;
                 const password_login = this.password;
 
@@ -196,8 +199,11 @@
             },
         },
         data: () => ({
-            valid: false,
-            password: '',
+            form: false,
+            email: null,
+            password: null,
+            loading: false,
+            Vaule: String,
             nameRules: [
                 value => {
                 if (value) return true
@@ -210,7 +216,6 @@
                 return 'Password must be less than 16 characters.'
                 },
             ],
-            email: '',
             emailRules: [
                 value => {
                 if (value) return true
@@ -301,7 +306,7 @@ div{
         /* border: solid; */
         border-top: dashed;
         padding-top: 5vw;
-        background-color: #ac19e1;
+        /* background-color: #ac19e1; */
         display: flex;
         align-items: center;
         justify-content: center;
