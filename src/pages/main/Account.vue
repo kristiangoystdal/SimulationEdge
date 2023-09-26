@@ -1,0 +1,22 @@
+<template>
+  <UserData></UserData>
+  <SignOut></SignOut>
+</template>
+  
+  <script>
+    import SignOut from '../../components/SignOut.vue'
+    import UserData from '../../components/UserData.vue'
+
+    export default{
+      name: "AccountPage", 
+      components: {
+        SignOut, UserData,
+      }
+    }
+  </script>
+  
+  <style scoped>
+
+
+  </style>
+  
