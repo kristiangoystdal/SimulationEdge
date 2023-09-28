@@ -125,7 +125,7 @@ export default {
         }
         
         .logo{
-            height: 50%;
+            height: 100%;
             padding: 1%;
             position: relative;
         }
