@@ -1,6 +1,6 @@
 <template>
 
-    <v-sheet :style="{ height: 'auto', width: '30vw'}" id="center" rounded >
+    <v-sheet w-50 style="max-width: 400px" id="center" rounded >
         <div id="login">Login</div>
 
         <v-form
@@ -8,6 +8,7 @@
             @submit.prevent="onSubmit"
             id="loginForm"
         >
+            <!-- E-mail Input field -->
             <v-text-field
             v-model="email"
             :readonly="loading"
@@ -17,6 +18,7 @@
             label="Email"
             ></v-text-field>
 
+            <!-- Password Input field -->
             <v-text-field
             v-model="password"
             :readonly="loading"
@@ -24,11 +26,14 @@
             clearable
             label="Password"
             placeholder="Enter your password"
-            :append-icon="show ?'mdi-eye':'mdi-eye-off'"   
-                @click:append="show=!show">
-            ></v-text-field>
+            :type="show ? 'text' : 'password'"
+            :append-inner-icon="show ? 'mdi-eye' : 'mdi-eye-off'"     
+            @click:append-inner="show=!show"
+            >
+            </v-text-field>
 
             <br>
+
 
             <v-btn
             :disabled="!form"
@@ -59,33 +64,13 @@
                 <img src="../../assets/photos/google_logo.png" alt="google_logo">
             </div>
         </div>
-        <v-img
-        :width="300"
-        aspect-ratio="1/1"
-        cover
-        src="../../assets/photos/Lofoten.png"
-        ></v-img>
-
-        <v-img
-        :width="300"
-        aspect-ratio="1/1"
-        cover
-        src="../../assets/photos/google_logo.png"
-        ></v-img>
-    </v-sheet>
-    
-
-    <div id="box">
-
-
-                
         
-  
         <!-- Registration link -->
-        <div id="registerLink">
+        <div>
             <router-link to="/register">Register here</router-link>
         </div>
-    </div>
+    </v-sheet>
+    
   </template>
   
 <script>
@@ -235,9 +220,6 @@ div{
 
 #center{
     margin: auto;
-    align-content: center;
-    align-items: center;
-    justify-content: center;
 }
 
 @media (min-width: 769px){
@@ -282,7 +264,6 @@ div{
         margin: auto;
         /* border: solid; */
         border-top: dashed;
-        padding-top: 5vw;
         /* background-color: #ac19e1; */
         display: flex;
         align-items: center;
@@ -296,10 +277,10 @@ div{
     }
 
     .social-signin_facebook{
-        height: 15vw;
-        width: auto;
+        width: 20%;
+        height: auto;
         margin: 2vw;
-        padding: 2vw;
+        padding: 0.7vw;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -309,10 +290,10 @@ div{
         cursor: pointer;
     }
     .social-signin_google{
-        height: 15vw;
-        width: auto;
+        height: auto;
+        width: 20%;
         margin: 2vw;
-        padding: 2vw;
+        padding: 1vw;
         display: flex;
         justify-content: space-between;
         align-items: center;
