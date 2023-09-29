@@ -28,6 +28,8 @@ const router = createRouter({
 });
 
 // Vuetify
+import "@mdi/font/css/materialdesignicons.css"
+import colors from 'vuetify/lib/util/colors'
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'

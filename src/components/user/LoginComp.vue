@@ -12,7 +12,7 @@
             <v-text-field
             v-model="email"
             :readonly="loading"
-            :rules="emailRules"
+            :rules="[rules.required, rules.email]"
             class="mb-2"
             clearable
             label="Email"
@@ -22,7 +22,7 @@
             <v-text-field
             v-model="password"
             :readonly="loading"
-            :rules="nameRules"
+            :rules="[rules.required]"
             clearable
             label="Password"
             placeholder="Enter your password"
@@ -52,7 +52,7 @@
         <br><br>
 
         <div id="social">
-            <!-- <span class="loginWith">Sign in with:</span><br> -->
+
     
             <!-- Facebook login button -->
             <div class="social-signin_facebook" @click="signInWithFacebook">
@@ -89,30 +89,7 @@
   
         methods: {
             ...mapActions(['setUser']),
-
-            // Validate email format
-            validateEmail() {
-                const emailInput = this.email;
-                // Regular expression to check if the input is a valid email address
-                const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-                return emailPattern.test(emailInput);
-            },
-            
-            // Validate input and trigger registration
-            inputValidater() {
-                this.passwordDifferent = false;
-                this.emailNotValidated = false;
-
-                var faultyRegister = false
                 
-                if (!this.validateEmail()) {
-                    this.emailNotValidated = true;
-                    faultyRegister = true;
-                }
-        
-                return !faultyRegister;
-            },
-    
             // Handle user login
             login() {
                 if (!this.form) return
