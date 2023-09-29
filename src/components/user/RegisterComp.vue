@@ -121,7 +121,7 @@
                     // Handle registration error
                     console.log(error.code);
                     alert(error.message);
-                });   
+                });  
             },
             
         },
