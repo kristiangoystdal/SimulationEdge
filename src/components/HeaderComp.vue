@@ -1,5 +1,4 @@
 <template v-slot:header>
-    <v-app-bar :elevation="0">HEader</v-app-bar>
     <header>
         <div class="logo">
             <a href="/" target="_top">
@@ -126,7 +125,7 @@ export default {
         }
         
         .logo{
-            height: 50%;
+            height: 100%;
             padding: 1%;
             position: relative;
         }
