@@ -1,6 +1,6 @@
 <template>
 
-    <v-sheet w-90 style="max-width: 400px" id="center" rounded >
+    <v-sheet class="sheet" style="max-width: 400px" id="center" rounded >
         <div id="register">Register</div>
 
         <v-form
@@ -62,13 +62,15 @@
             Sign Up
             </v-btn>
         </v-form>
+        <br>
+        <!-- Login link -->
+        <div id="link">
+            <router-link to="/login">Login here</router-link>
+        </div>
 
         <br><br>
         
-        <!-- Registration link -->
-        <div>
-            <router-link to="/login">Login here</router-link>
-        </div>
+        
     </v-sheet>
     
 </template>
@@ -131,7 +133,7 @@
                 email: null,
                 password1: null,
                 password2: null,
-                loading: true,
+                loading: false,
                 show1: false,
                 show2: false,
                 rules:{
@@ -147,6 +149,7 @@
     };
   </script>
 
+ 
 <style scoped>
 
 div{
@@ -170,27 +173,30 @@ div{
     margin: auto;
 }
 
-@media (min-width: 769px){
-    #box{
-        margin: 3vw auto;
-        width: 90vw;
-        height: 80vh;
-        border-radius: 10px;
-        border: solid;
-        background-color:#ac19e1;
-    }
+.sheet{
+    max-width: 400px;
+    width: 90%;
+}
 
-    #register{
+
+img{
+    height: 100%;
+    width: 100%;
+}
+
+
+@media (min-width: 769px){
+    #login{
         font-size: 3vw;
         padding-top: 3vw;
         padding-bottom: 3vw;
         text-align: center;
         font-family: 'TitleFont', sans-serif;
         text-decoration: underline;
-        height: auto;
+        height: 10vw
     }
 
-    #registerForm{
+    #loginForm{
         width: 90%;
         margin: auto;
         height: auto;
@@ -225,7 +231,7 @@ div{
         width: 20%;
         height: auto;
         margin: 2vw;
-        padding: 0.7vw;
+        padding: 0.3vw;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -248,40 +254,51 @@ div{
         cursor: pointer;
     }
 
-
-    .social-text{
-        width: 70%;
-        font-size: 3.4vw;
-    }
-
-    img{
-        height: 100%;
-        width: 100%;
-    } 
-
-    #registerLink{
-        font-size: 6vw;
+    #link{
+        font-size: 1.4vw;
         text-align: center;
-        width: 50%;
         height: auto;
         font-family: 'TitleFont', sans-serif;
         padding-top: 0;
-        padding-bottom: 10vw;
-        margin: 5vw auto;
-        align-items: center;
+        margin: auto;
         color: black;
+    }
+}
+
+@media (max-width: 768px){
+    #register{
+        font-size: 10vw;
+        padding-top: 10vw;
+        padding-bottom: 10vw;
+        text-align: center;
+        font-family: 'TitleFont', sans-serif;
         text-decoration: underline;
+        height: auto
     }
 
-    #errorMessages{
-        background-color: #ff0000;
-        color: black;
-        font-size: 4vw;
-        text-align: center;
-        width: auto;
+    #registerForm{
+        width: 90%;
+        margin: auto;
         height: auto;
-        border-radius: 1vw;
+    }
+
+    #form{
+        padding: 5vw 0;
+        height: auto;
+        padding-bottom: 10vw;
+        width: 85%;
+        margin: auto;
+        border-bottom: none;
+    }
+
+    #link{
+        font-size: 5vw;
+        text-align: center;
+        height: auto;
         font-family: 'TitleFont', sans-serif;
+        padding-top: 0;
+        margin: auto;
+        color: black;
     }
 }
 </style>
