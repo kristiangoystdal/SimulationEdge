@@ -1,6 +1,6 @@
 <template>
 
-    <v-sheet w-50 style="max-width: 400px" id="center" rounded >
+    <v-sheet class="sheet" style="max-width: 400px" id="center" rounded >
         <div id="login">Login</div>
 
         <v-form
@@ -48,12 +48,14 @@
             Sign In
             </v-btn>
         </v-form>
+        <br>
 
-        <br><br>
+        <div id="link">
+            <router-link to="/register">Register here</router-link>
+        </div>
+        <br>
 
-        <div id="social">
-
-    
+        <div id="social">  
             <!-- Facebook login button -->
             <div class="social-signin_facebook" @click="signInWithFacebook">
                 <img src="../../assets/photos/facebook_logo-transparent.png" alt="facebook_logo">
@@ -66,9 +68,7 @@
         </div>
         
         <!-- Registration link -->
-        <div>
-            <router-link to="/register">Register here</router-link>
-        </div>
+        
     </v-sheet>
     
   </template>
@@ -166,30 +166,14 @@
             password: null,
             loading: false,
             show: false,
-            nameRules: [
-                value => {
-                if (value) return true
-
-                return 'Password is required.'
-                },
-                value => {
-                if (value?.length <= 16) return true
-
-                return 'Password must be less than 16 characters.'
-                },
-            ],
-            emailRules: [
-                value => {
-                if (value) return true
-
-                return 'E-mail is requred.'
-                },
-                value => {
-                if (/.+@.+\..+/.test(value)) return true
-
-                return 'E-mail must be valid.'
-                },
-            ],
+            rules:{
+                required: value => !!value || 'Field is required',
+                min: value => value.length >= 8 || 'Password must be min 8 characters',
+                digit: value => (/\d/.test(value)) || 'Password must include a number',
+                capital: value => (/[A-Z]/.test(value)) || 'Password must include a capital letter',
+                email: value => (/.+@.+\..+/.test(value)) || 'Email must be valid',
+                passwordmatch: value => value==this.password1 || "Password doesn't match",
+            },
             loginComp: false,
             passwordCheck: false,
             passwordEmpty: true,
@@ -222,16 +206,19 @@ div{
     margin: auto;
 }
 
-@media (min-width: 769px){
-    #box{
-        margin: 3vw auto;
-        width: 90vw;
-        height: 80vh;
-        border-radius: 10px;
-        border: solid;
-        background-color:#ac19e1;
-    }
+.sheet{
+    max-width: 400px;
+    width: 90%;
+}
 
+
+img{
+    height: 100%;
+    width: 100%;
+}
+
+
+@media (min-width: 769px){
     #login{
         font-size: 3vw;
         padding-top: 3vw;
@@ -239,7 +226,7 @@ div{
         text-align: center;
         font-family: 'TitleFont', sans-serif;
         text-decoration: underline;
-        height: auto;
+        height: 10vw
     }
 
     #loginForm{
@@ -261,9 +248,7 @@ div{
         height: auto;
         width: 100%;
         margin: auto;
-        /* border: solid; */
         border-top: dashed;
-        /* background-color: #ac19e1; */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -279,7 +264,7 @@ div{
         width: 20%;
         height: auto;
         margin: 2vw;
-        padding: 0.7vw;
+        padding: 0.3vw;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -302,61 +287,31 @@ div{
         cursor: pointer;
     }
 
-
-    .social-text{
-        width: 70%;
-        font-size: 3.4vw;
-    }
-
-    img{
-        height: 100%;
-        width: 100%;
-    } 
-
-    #registerLink{
-        font-size: 6vw;
+    #link{
+        font-size: 1.4vw;
         text-align: center;
-        width: 50%;
         height: auto;
         font-family: 'TitleFont', sans-serif;
         padding-top: 0;
-        padding-bottom: 10vw;
-        margin: 5vw auto;
-        align-items: center;
+        margin: auto;
         color: black;
-        text-decoration: underline;
     }
-
-    #errorMessages{
-        background-color: #ff0000;
-        color: black;
-        font-size: 4vw;
-        text-align: center;
-        width: auto;
-        height: auto;
-        border-radius: 1vw;
-        font-family: 'TitleFont', sans-serif;
-    }
-
 }
 
 @media (max-width: 768px){
-    #box{
-        margin: 3vw auto;
-        width: 90vw;
-        height: 80vh;
-        border-radius: 10px;
-        border: solid;
-        background-color:#ac19e1;
-    }
-
     #login{
         font-size: 10vw;
-        padding-top: 15vw;
-        padding-bottom: 15vw;
+        padding-top: 10vw;
+        padding-bottom: 10vw;
         text-align: center;
         font-family: 'TitleFont', sans-serif;
         text-decoration: underline;
+        height: auto
+    }
+
+    #loginForm{
+        width: 90%;
+        margin: auto;
         height: auto;
     }
 
@@ -368,41 +323,17 @@ div{
         margin: auto;
         border-bottom: none;
     }
-    #emailBox, #passwordBox1, #passwordBox2{
-        width: 100%;  
-        height: auto;
-        margin: auto;
-        border-radius: 1vw;
-        display: flex;
-    }
-    
-    #username, #email, #password{
-        width: 100%;
-        height: 10vw;
-        margin: 0.5vw auto;
-        font-size: auto;
-        border-radius: 1vw;
-        font-family: 'TitleFont', sans-serif;
-    }
-    
-    #loginButton{
-        width: 50%;
-        height: auto;
-        font-size: 5vw;
-        margin: 5vw 25%;
-        font-family: 'TitleFont', sans-serif;
-    }
 
     #social{
         height: auto;
         width: 100%;
         margin: auto;
         border-top: dashed;
-        padding-top: 5vw;
-        background-color: #ac19e1;
         display: flex;
         align-items: center;
         justify-content: center;
+        padding-top: 5vw;
+        padding-bottom: 5vw;
     }
     .loginWith{
         display: none;
@@ -412,10 +343,10 @@ div{
     }
 
     .social-signin_facebook{
-        height: 15vw;
-        width: auto;
-        margin: 2vw;
-        padding: 2vw;
+        width: 25%;
+        height: auto;
+        margin: 5vw;
+        padding: 0.7vw;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -425,10 +356,10 @@ div{
         cursor: pointer;
     }
     .social-signin_google{
-        height: 15vw;
-        width: auto;
-        margin: 2vw;
-        padding: 2vw;
+        height: auto;
+        width: 25%;
+        margin: 5vw;
+        padding: 1vw;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -438,40 +369,14 @@ div{
         cursor: pointer;
     }
 
-
-    .social-text{
-        width: 70%;
-        font-size: 3.4vw;
-    }
-
-    img{
-        height: 100%;
-        width: 100%;
-    } 
-
-    #registerLink{
-        font-size: 6vw;
+    #link{
+        font-size: 5vw;
         text-align: center;
-        width: 50%;
         height: auto;
         font-family: 'TitleFont', sans-serif;
         padding-top: 0;
-        padding-bottom: 10vw;
-        margin: 5vw auto;
-        align-items: center;
+        margin: auto;
         color: black;
-        text-decoration: underline;
-    }
-
-    #errorMessages{
-        background-color: #ff0000;
-        color: black;
-        font-size: 4vw;
-        text-align: center;
-        width: auto;
-        height: auto;
-        border-radius: 1vw;
-        font-family: 'TitleFont', sans-serif;
     }
 }
 </style>
