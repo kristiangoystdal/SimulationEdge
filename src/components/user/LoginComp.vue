@@ -12,7 +12,9 @@
             <div id="passwordBox1">
                 <input type="text" id="password" name="password" placeholder="Password" ref="password_signin" @input="passwordChecker">
             </div>
-
+            <div>
+                
+            </div>
             <div id="errorMessages">
                 <div v-if="emailNotValidated">E-mail is not a valid e-mail address</div>
                 <div v-if="WrongInfo">Email and password doesn't match</div>
