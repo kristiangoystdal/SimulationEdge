@@ -5,7 +5,7 @@ import store from './js/store.js'
 import App from './App.vue'
 
 // Import routes from separate file
-import routes from './js/routes.js'
+import router from './js/routes.js'
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -21,15 +21,9 @@ const firebaseConfig = {
 // Initialize Firebase app
 initializeApp(firebaseConfig);
 
-// Create router with history mode
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-});
 
 // Vuetify
 import "@mdi/font/css/materialdesignicons.css"
-import colors from 'vuetify/lib/util/colors'
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
