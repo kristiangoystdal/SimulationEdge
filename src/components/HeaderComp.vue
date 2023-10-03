@@ -5,7 +5,7 @@
                 <img src="../assets/photos/Logo_siden.png" alt="Logo" target="_top" href='/'>
             </a>
         </div>
-        <div v-if="!mobile">
+        <div v-if="isScreenWideEnough">
             <nav>	
                 <ul class="nav-menu">
                     <li v-for="item in menu" :key="item.name">
@@ -29,7 +29,7 @@
                             <router-link v-if="user" class="menuItem" to="/account" @click="toggleMenu">Account</router-link>
                         </div>
                     </li>
-                    <img src="../assets/photos/x.svg" id="menuClose" alt="Close Button" @click="toggleMenu">
+                    <v-icon icon="mdi-close" size="15vw" id="menuClose" @click="toogleMenu"></v-icon>
                 </div>
             </div>
         </div>
@@ -61,6 +61,7 @@ export default {
             ],
             menuState: false,
             mobile: false,
+            isScreenWideEnough: false,
         }
     },
     methods:{
@@ -79,29 +80,30 @@ export default {
                 }
             });
         },
-        isMobile() {
-
-            // const mediaQuery = window.matchMedia('(min-width: 768px)')
-            if(window.innerWidth < 768) {
-                this.mobile = true;
-                return true
-            } else {
-                this.mobile = false;
-                return false
-            }
+        checkScreenWidth() {
+            this.isScreenWideEnough = window.innerWidth >= 768; // Adjust the threshold as needed
         },
         toggleMenu(){
             this.menuState = !this.menuState
         },
     },
     created() {
-      this.observeAuthState();
-      this.isMobile();
+        this.observeAuthState();
+        // Call the method to check screen width initially
+        this.checkScreenWidth();
+
+        // Add a window resize event listener to update the screen width check
+        window.addEventListener('resize', this.checkScreenWidth);
+    },
+    beforeDestroy() {
+        // Remove the event listener when the component is destroyed to prevent memory leaks
+        window.removeEventListener('resize', this.checkScreenWidth);
     },
     computed: {
         user() {
             return this.$store.getters.getCurrUser;
         },
+        
     },
 }
 </script>
@@ -236,9 +238,11 @@ export default {
             height: auto;
             cursor: pointer;
             margin-right: 2vw;
+            z-index: 101;
         }
 
         #menu{
+            z-index: 100;
             display: inline-block;
             position: absolute;
             margin: auto;
@@ -254,8 +258,6 @@ export default {
             align-items: center;
             justify-content: center;
         }
-        
-
         .menuItem {
             text-decoration: none;
             color: white;
@@ -280,9 +282,8 @@ export default {
         }
 
         #menuClose{
-            width: 10vw;
-            height: auto;
-            padding: 10vw;    
+            width: 2vw;
+            height: auto;  
         }
 
         .slide-enter-active, .slide-leave-active {
