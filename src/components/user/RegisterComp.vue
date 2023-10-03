@@ -186,7 +186,7 @@ img{
 
 
 @media (min-width: 769px){
-    #login{
+    #register{
         font-size: 3vw;
         padding-top: 3vw;
         padding-bottom: 3vw;
@@ -196,7 +196,7 @@ img{
         height: 10vw
     }
 
-    #loginForm{
+    #registerForm{
         width: 90%;
         margin: auto;
         height: auto;
@@ -209,49 +209,6 @@ img{
         width: 85%;
         margin: auto;
         border-bottom: none;
-    }
-
-    #social{
-        height: auto;
-        width: 100%;
-        margin: auto;
-        border-top: dashed;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .loginWith{
-        display: none;
-        width: 90%;
-        font-size: 5vw;
-        text-decoration: underline;
-    }
-
-    .social-signin_facebook{
-        width: 20%;
-        height: auto;
-        margin: 2vw;
-        padding: 0.3vw;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-radius: 50%;
-        border: solid;
-        background-color: #2f7af4;
-        cursor: pointer;
-    }
-    .social-signin_google{
-        height: auto;
-        width: 20%;
-        margin: 2vw;
-        padding: 1vw;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-radius: 50%;
-        border: solid;
-        background-color: white;
-        cursor: pointer;
     }
 
     #link{
