@@ -2,7 +2,7 @@
     <div id="box">
         <div id="text">This page is under development</div>
         <div id="image">
-            <img src="../assets/photos/development_gif.gif" alt="Coding Gif">
+            <img src="../../assets/photos/development_gif.gif" alt="Coding Gif">
         </div>
     </div>
 </template>
