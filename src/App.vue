@@ -10,8 +10,8 @@
 </template>
 
 <script>
-  import Header from "./components/HeaderComp.vue"
-  import Footer from "./components/Footer.vue"
+  import Header from "./components/main/HeaderComp.vue"
+  import Footer from "./components/main/Footer.vue"
   
   export default {
     name: 'App',
@@ -33,8 +33,8 @@
       background-attachment: fixed;
       background-size: cover;
   }
-  #app {
-    min-height: 100vw; 
+  /* #app {
+    min-height: 100vh; 
     margin: 0; 
   }
 
@@ -44,7 +44,7 @@
 
   #router{
     min-height: 100vh;
-  }
+  } */
 
   Footer{
     position: relative;

@@ -8,19 +8,19 @@
         <div class="grid">
           <div class="gridItem">
             <router-link to="/games/gaming-central" class="game-item">
-              <img src="../assets/photos/Gaming_Central_Logo.png" alt="Game" class="round-image">
+              <img src="../../assets/photos/Gaming_Central_Logo.png" alt="Game" class="round-image">
               <span class="under-text">Gaming Central</span>
             </router-link>
           </div>
           <div class="gridItem">
             <router-link to="/games/the-alphabet-game" class="game-item">
-              <img src="../assets/photos/Type_the_Alphabet.png" alt="Game" class="round-image">
+              <img src="../../assets/photos/Type_the_Alphabet.png" alt="Game" class="round-image">
               <span class="under-text">The Alphabet Game</span>
             </router-link>
           </div>
           <div class="gridItem">
             <router-link to="/under-development" class="game-item">
-              <img src="../assets/photos/coming_soon.png" alt="Game" class="round-image">
+              <img src="../../assets/photos/coming_soon.png" alt="Game" class="round-image">
               <span class="under-text">Coming Soon</span>
             </router-link>
           </div>
