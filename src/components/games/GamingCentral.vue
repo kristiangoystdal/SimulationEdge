@@ -1,7 +1,7 @@
 <template>
     <div id="game">
         <div class="game-container">
-            <iframe frameborder="0" src="https://itch.io/embed-upload/7179883?color=9308ba" allowfullscreen="" id="widget"></iframe>
+            <iframe frameborder="0" src="https://itch.io/embed-upload/8869520?color=9308ba" allowfullscreen="" id="widget"></iframe>
         </div>
         <br>
         <div id="links">
