@@ -29,7 +29,7 @@
                             <router-link v-if="user" class="menuItem" to="/account" @click="toggleMenu">Account</router-link>
                         </div>
                     </li>
-                    <v-icon icon="mdi-close" size="15vw" id="menuClose" @click="toogleMenu"></v-icon>
+                    <v-icon icon="mdi-close" size="15vw" id="menuClose" @click="toggleMenu"></v-icon>
                 </div>
             </div>
         </div>
