@@ -3,7 +3,7 @@
             <div class="foottext">
                 <h4 f>© Simulation Edge 2023</h4>
 
-                <img src="../assets/photos/Google-Play-Logo.png" class="google-logo" alt="Google-Play-Logo" href="https://play.google.com/store/apps/developer?id=Simulation+Edge" target="blank">
+                <img src="../../assets/photos/Google-Play-Logo.png" class="google-logo" alt="Google-Play-Logo" href="https://play.google.com/store/apps/developer?id=Simulation+Edge" target="blank">
             </div>
         </footer>
 </template>

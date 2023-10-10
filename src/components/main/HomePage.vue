@@ -1,6 +1,6 @@
 <template>
     <div class="startPic">
-      <img src="../assets/photos/SimpleBackground1.png" alt="Background">
+      <img src="../../assets/photos/SimpleBackground1.png" alt="Background">
     </div>
   </template>
   

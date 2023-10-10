@@ -2,7 +2,7 @@
     <header>
         <div class="logo">
             <a href="/" target="_top">
-                <img src="../assets/photos/Logo_siden.png" alt="Logo" target="_top" href='/'>
+                <img src="../../assets/photos/Logo_siden.png" alt="Logo" target="_top" href='/'>
             </a>
         </div>
         <div v-if="isScreenWideEnough">
@@ -20,7 +20,7 @@
         </div>
         <div v-else>
             <div id="menu-button">
-                <img src="../assets/photos/Hamburger_icon.png" alt="Hamburger Icon" @click="toggleMenu">
+                <img src="../../assets/photos/Hamburger_icon.png" alt="Hamburger Icon" @click="toggleMenu">
                 <div v-if="menuState" id="menu">
                     <li v-for="item in menu" :key="item.name">
                         <router-link v-if="!item.hasOwnProperty('userState')" class="menuItem" :to="item.url" @click="toggleMenu">{{ item.name }}</router-link>
@@ -29,7 +29,7 @@
                             <router-link v-if="user" class="menuItem" to="/account" @click="toggleMenu">Account</router-link>
                         </div>
                     </li>
-                    <v-icon icon="mdi-close" size="15vw" id="menuClose" @click="toogleMenu"></v-icon>
+                    <v-icon icon="mdi-close" size="15vw" id="menuClose" @click="toggleMenu"></v-icon>
                 </div>
             </div>
         </div>
@@ -180,7 +180,7 @@ export default {
             font-display: auto;
             font-weight: 400;
             font-style: normal;
-            src: url('../assets/fonts/FredokaOne-Regular.ttf') format('truetype');
+            src: url('../../assets/fonts/FredokaOne-Regular.ttf') format('truetype');
         }
 
         .link{
@@ -273,7 +273,7 @@ export default {
 
         @font-face {
             font-family: 'TitleFont';
-            src: url('/src/assets/fonts/FredokaOne-Regular.ttf');
+            src: url('../../assets/fonts/FredokaOne-Regular.ttf');
         }
 
         .link{

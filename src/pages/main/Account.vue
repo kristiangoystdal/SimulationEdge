@@ -4,7 +4,7 @@
 </template>
   
   <script>
-    import SignOut from '../../components/SignOut.vue'
+    import SignOut from '../../components/user/SignOut.vue'
     import UserData from '../../components/user/UserData.vue'
 
     export default{

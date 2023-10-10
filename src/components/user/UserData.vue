@@ -1,59 +1,38 @@
 <template>
-    <v-container style="max-width: 600px">
-      <v-row>
-        <v-col cols="200">
+  <v-container fluid>
+      <v-layout column>
           <v-card>
-            <v-card-title>
-              <div class="headline">Profile</div>
-            </v-card-title>
-            <v-card-text>
-              <v-row>
-                <v-col cols="3">
-                  <div class="caption">Username:</div>
-                </v-col>
-                <v-col cols="9">
-                  <div v-if="!editing">{{ name || 'No username created' }}</div>
+              <v-card-text>
+                  <v-flex class="mb-4">
+                      <v-avatar size="96" class="mr-4">
+                          <img :src="'/avatars/avatar_' + (form.avatar.toLowerCase()) + '.png'" alt="Avatar">
+                      </v-avatar>
+                      <v-btn @click="openAvatarPicker">Change Avatar</v-btn>
+                  </v-flex>
                   <v-text-field
-                    v-else
-                    v-model="name"
-                    label="Username"
-                    outlined
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="3">
-                  <div class="caption">E-mail:</div>
-                </v-col>
-                <v-col cols="9">
-                  <div v-if="!editing">{{ email }}</div>
+                      v-model="form.firstName"
+                      label="FirstName"></v-text-field>
                   <v-text-field
-                    v-else
-                    v-model="email"
-                    label="E-mail"
-                    outlined
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn
-                v-if="!editing"
-                color="primary"
-                @click="toggleEdit"
-              >
-                Edit Profile
-              </v-btn>
-              <div v-else>
-                <v-btn color="success" @click="saveChanges">Save Changes</v-btn>
-                <v-btn color="error" @click="toggleEdit">Cancel</v-btn>
-              </div>
-            </v-card-actions>
+                      v-model="form.lastName"
+                      label="Last Name"></v-text-field>
+                  <v-text-field
+                      v-model="form.contactEmail"
+                      label="Email Address"></v-text-field>
+              </v-card-text>
+              <v-card-actions>
+                  <v-btn color="primary" :loading="loading" @click.native="update">
+                      <v-icon left dark>check</v-icon>
+                      Save Changes
+                  </v-btn>
+              </v-card-actions>
           </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </template>
+      </v-layout>
+      <avatar-picker
+          v-model="showAvatarPicker"
+          :current-avatar="form.avatar"
+          @selected="selectAvatar"></avatar-picker>
+  </v-container>
+</template>
   
   <script>
   import { mapActions } from 'vuex';
@@ -104,7 +83,6 @@
   
         updateProfile(auth.currentUser, {
           displayName: this.name,
-          photoURL: 'https://example.com/jane-q-user/profile.jpg',
         })
           .then(() => {
             console.log('Profile Updated');
@@ -121,6 +99,15 @@
   </script>
   
   <style scoped>
+
+  .border{
+    border: solid;
+  }
+  
+  .center{
+    margin: auto;
+    text-align: center;
+  }
   @media (min-width: 769px) {
     /* Add any custom CSS for larger screens if needed */
   }
