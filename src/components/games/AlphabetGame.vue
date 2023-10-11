@@ -1,10 +1,20 @@
 <template>
+    <v-container id="box" color="primary">
+      <div id="alphabet">
+        <span v-for="(letter, index) in alphabet" :key="letter" :id="letter">
+          <div id="chip" :class="{ 'green-bg': index < currentIndex && input[index]==alphabet[index], 'red-bg': index < currentIndex && input[index]!=alphabet[index], 'white-bg': index >= currentIndex}">
+            {{ letter }}
+          </div>
+        </span>
+      </div>
+    </v-container>
+
     <div id="game">
       <div id="alphabet">
         <span v-for="(letter, index) in alphabet" :key="letter" :id="letter" :class="{ 'green-text': index < currentIndex }">{{ letter }}</span>
       </div>
       <div>
-        <input type="text" id="input-letter" maxlength="1" v-model="inputValue" @input="checkLetter">
+        <input type="text" id="input-letter" maxlength="1" v-model="inputValue" @input="changeLetter">
       </div>
   
       <div id="timer">Time: {{ formattedTimer }} seconds</div>
@@ -21,13 +31,16 @@
     data() {
       return {
         alphabet: "abcdefghijklmnopqrstuvwxyz".split(""),
+        input: "".split(""),
         inputValue: "",
         currentIndex: 0,
         startTime: null,
         endTime: null,
         timer: 0,
         intervalId: null,
-        doneText: ""
+        doneText: "",
+        win: null
+        
       };
     },
     created() {
@@ -47,6 +60,29 @@
             this.timer = diff;
           }
         }, 10);
+      },
+      changeLetter() {
+        if (event.key === 'Backspace') {
+          // Check if Backspace key was pressed
+          if (this.currentIndex > 0) {
+            // Only remove the last item if there are items to remove
+            this.currentIndex--;
+            this.input[this.currentIndex] = ""; // Clear the last item
+          }
+        } else {
+          this.input[this.currentIndex] = this.inputValue.toLowerCase();
+          this.inputValue = "";
+          this.currentIndex++;
+        }
+      },
+      checkWin(){
+        win = true;
+        for(i = 0; i<this.alphabet.length; i++){
+          if(input[i]!=this.alphabet[i]){
+            win = false;
+            break;
+          }
+        }
       },
       checkLetter() {
         const currentLetter = this.alphabet[this.currentIndex];
@@ -74,6 +110,7 @@
         clearInterval(this.intervalId);
       },
       reset() {
+        this.input = "";
         this.inputValue = "";
         this.currentIndex = 0;
         this.timer = 0;
@@ -92,10 +129,40 @@
         margin: 0;
         padding: 0;
     }
-    .green-text {
-        color: green;
+    .green-bg {
+        background-color: green;
     }
-    @media (min-width: 769px) {
+    .white-bg{
+      background-color: white;
+    }
+
+    .red-bg{
+      background-color: red;
+    }
+
+    #box{
+      border: solid;
+      margin: auto;
+      display: flex;
+      justify-content: center;
+      background-color:bisque;
+      border-radius: 20px;
+    }
+
+    #chip{
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      text-align: center;
+      font-size: auto;
+      border: solid;
+    }
+
+    #alphabet{
+      display: flex;
+    }
+
+    /* @media (min-width: 769px) {
         #game {
             justify-content: center;
             text-align: center;
@@ -184,7 +251,7 @@
             border-radius: 2vw;
             border: solid;
         }
-    }
+    } */
     
 
     
