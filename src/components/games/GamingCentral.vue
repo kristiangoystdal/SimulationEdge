@@ -1,4 +1,6 @@
 <template>
+    <TitleVue :title='pageTitle'></TitleVue>
+
     <div id="game">
         <div class="game-container">
             <iframe frameborder="0" src="https://itch.io/embed-upload/8869520?color=9308ba" allowfullscreen="" id="widget"></iframe>
@@ -42,7 +44,19 @@
 </template>
   
 <script>
+    import TitleVue from '../extra/Title.vue';
 
+    export default {
+        name: 'GamingCentral',
+        data() {
+            return {
+                pageTitle: "Gaming Central"
+            };
+        },
+        components: {
+            TitleVue
+        },
+    }
 </script>
 
 <style scoped>
