@@ -15,6 +15,7 @@ coverage
 *.local
 
 *.js
+/js/
 
 /cypress/videos/
 /cypress/screenshots/
