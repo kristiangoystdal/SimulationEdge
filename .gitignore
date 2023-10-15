@@ -14,9 +14,8 @@ dist-ssr
 coverage
 *.local
 
-*.js
-/js/
-/main.js
+./src/js/firebaseConfig.js
+
 /cypress/videos/
 /cypress/screenshots/
 
@@ -29,3 +28,5 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+*.env
+
