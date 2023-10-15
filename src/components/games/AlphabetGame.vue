@@ -1,78 +1,82 @@
 <template>
-    <TitleVue :title='pageTitle'></TitleVue>
+  <TitleVue :title='pageTitle'></TitleVue>
 
-    <v-container id="box">
-      <div id="alphabet" class="alphabet-flex">
-        <span v-for="(letter, index) in alphabet" :key="letter" :id="letter">
-          <div id="chip" 
-              :class="{ 
-                'green-bg': index < currentIndex && input[index] == alphabet[index], 
-                'red-bg': index < currentIndex && input[index] != alphabet[index], 
-                'white-bg': index >= currentIndex 
-              }"
-              class="chip">
-            {{ letter }}
-          </div>
-        </span>
-      </div>
+  <v-container id="box">
+    <div id="alphabet" class="alphabet-flex">
+      <span v-for="(letter, index) in alphabet" :key="letter" :id="letter">
+        <div id="chip" 
+            :class="{ 
+              'green-bg': index < currentIndex && input[index] == alphabet[index], 
+              'red-bg': index < currentIndex && input[index] != alphabet[index], 
+              'white-bg': index >= currentIndex 
+            }"
+            class="chip">
+          {{ letter }}
+        </div>
+      </span>
+    </div>
+    
+  </v-container>
+
+  <div id="other">
+    <div id="user">
+      <div id="timer">Time: {{ formattedTimer }} seconds</div>
+      <div id="done-text">{{ doneText }}</div>
+      <v-btn id="reset-button" @click="reset">
+        Reset
+      </v-btn>
       
-    </v-container>
+      
 
-    <div id="other">
-      <div id="user">
-        <div id="timer">Time: {{ formattedTimer }} seconds</div>
-        <div id="done-text">{{ doneText }}</div>
-        <v-btn id="reset-button" @click="reset">
-          Reset
-        </v-btn>
-        
+      <div id="userList" v-if="user">
+        <div id="userTitle">Personal Best</div>
+        <div id="list">
+          <ul>
+            <li v-for="(item, index) in userScores" :key="index">
+              {{ item }}
+            </li>
+          </ul>
+        </div>
       </div>
-      <div id="highscoreBoard">
-        <div id="highscoreTitle">Highscores</div>
-        <div id="type">
-          <div id="top">
-            <div id="topTitle">Top</div>
-            <div id="list">
-              <ul>
-                <li v-for="(item, index) in topScores" :key="index">
-                  {{ index + 1 }}. {{ item }}
-                </li>
-              </ul>
-            </div>
+
+      <div v-else>Sign in to save scores</div>
+      
+    </div>
+    <div id="highscoreBoard">
+      <div id="highscoreTitle">Highscores</div>
+      <div id="type">
+        <div id="topList">
+          <div id="topTitle">Top</div>
+          <div id="list">
+            <ul>
+              <li v-for="(value, key) in topScores" :key="key">
+                {{ value }} - {{ key }}
+              </li>
+            </ul>
           </div>
-          <div id="latest">
-            <div id="latestTitle">Latest</div>
-            <div id="list">
-              <ul>
-                <li v-for="(item, index) in latestScores" :key="index">
-                  {{ index + 1 }}. {{ item }}
-                </li>
-              </ul>
-            </div>
+        </div>
+        <div id="latestList">
+          <div id="latestTitle">Latest</div>
+          <div id="list">
+            <ul>
+              <li v-for="(value, key) in latestScores" :key="key">
+                {{ value }} - {{ key }}
+              </li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
+  </div>
     
-    <!-- <div id="game">
-      <div id="alphabet">
-        <span v-for="(letter, index) in alphabet" :key="letter" :id="letter" :class="{ 'green-text': index < currentIndex }">{{ letter }}</span>
-      </div>
-      <div>
-        <input type="text" id="input-letter" maxlength="1" v-model="inputValue" @input="changeLetter">
-      </div>
-  
-      <div id="timer">Time: {{ formattedTimer }} seconds</div>
-  
-      <div id="done-text">{{ doneText }}</div>
-      <div>
-        <div id="reset-button" @click="reset">Reset</div>
-      </div>
-    </div> -->
-  </template>
+</template>
   
 <script>
   import TitleVue from '../extra/Title.vue';
+  import { getDatabase, ref, onValue } from 'firebase/database';
+  // import { getAuth, onAuthStateChanged} from "firebase/auth"
+
+ 
 
   export default {
     data() {
@@ -88,20 +92,17 @@
         doneText: "Done",
         win: null,
         pageTitle: "The Alphabet Game",
-        topScores: [
-          "Top 1",
-          "Top 2",
-          "Top 3",
-          // Add your items here, up to 20
-        ],
-        latestScores: [
+        topScores: {},
+        latestScores: {},
+        user: null,
+        userScores: [
           "Item 1",
           "Item 2",
           "Item 3",          
-          "Item 3",
-          "Item 3",
-          "Item 3",
-          "Item 3",
+          "Item 4",
+          "Item 5",
+          "Item 6",
+          "Item 7",
 
           // Add your items here, up to 20
         ],
@@ -112,7 +113,54 @@
       TitleVue
     },
     created() {
-      this.startTimer();
+      // this.startTimer();
+
+      // Check the authentication state when the component is created
+      // onAuthStateChanged(this.$fireAuth, (user) => {
+      //   this.user = user;
+      // });
+
+      // Reference to your Firebase database
+      const db = getDatabase();
+      const topScoresRef = ref(db, '/games/alphabetgame/highscores');
+
+      // Listen for changes in the 'topScores' data
+      onValue(topScoresRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          // Convert the dictionary to an array of objects
+          const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
+
+          // Sort the array by value in ascending order (lowest value first)
+          dataArray.sort((a, b) => a.value - b.value);
+
+          // Convert the sorted array back to a dictionary
+          this.topScores = {};
+          dataArray.forEach((item) => {
+            this.topScores[item.key] = item.value;
+          });
+        }
+      });
+
+      const latestScoresRef = ref(db, '/games/alphabetgame/latestScores');
+
+      // Listen for changes in the 'topScores' data
+      onValue(latestScoresRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          // Convert the dictionary to an array of objects
+          const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
+
+          // Sort the array by value in ascending order (lowest value first)
+          dataArray.sort((a, b) => a.value - b.value);
+
+          // Convert the sorted array back to a dictionary
+          this.latestScores = {};
+          dataArray.forEach((item) => {
+            this.latestScores[item.key] = item.value;
+          });
+        }
+      });
     },
     computed: {
       formattedTimer() {
@@ -188,7 +236,12 @@
         this.intervalId = null;
         this.alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
       }
-    }
+    },computed: {
+        user() {
+            return this.$store.getters.getCurrUser;
+        },
+        
+    },
   };
 </script>
 
@@ -288,6 +341,23 @@
       border-radius: 2vw;
       border: solid;
     }
+    #userList{
+      width: 80%;
+      margin: 2vw auto; 
+      height: auto;  
+      margin: 2vw auto;
+      border: solid;
+      text-align: center;
+      border-radius: 20px;
+      padding-bottom: 20px;
+    }
+    #userTitle{
+      border-bottom: solid;
+      margin: 0.5vw 0;
+      font-size: 1.2vw;
+      font-family: 'TitleFont';
+      /* text-decoration: underline; */
+    }
     
     #highscoreTitle{
       margin: 1vw;
@@ -299,11 +369,11 @@
       display: flex;
       margin: auto;
     }
-    #top{
+    #topList{
       border-right: solid;
       width: 50%;
     }
-    #latest{
+    #latestList{
       width: 50%;
     }
     #topTitle{
@@ -322,11 +392,11 @@
     }
     #list{
       text-align: left;
-      padding-left: 10px;
+      padding-left: 40px;
       padding-bottom: 20px;
     }
     li{
-      list-style: none;
+      list-style: decimal;
     }
 
 
