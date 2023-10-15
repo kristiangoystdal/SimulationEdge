@@ -47,27 +47,28 @@
         email: '',
         photoUrl: '',
         editing: false,
+        user: null,
       };
     },
     methods: {
       ...mapActions(['setUser']),
-      observeAuthState() {
-        const auth = getAuth();
+      // observeAuthState() {
+      //   const auth = getAuth();
   
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            this.$emit('user', user);
-            this.setUser(user);
+      //   onAuthStateChanged(auth, (user) => {
+      //     if (user) {
+      //       this.$emit('user', user);
+      //       this.setUser(user);
   
-            this.name = user.displayName;
-            this.email = user.email;
-            this.photoUrl = user.photoURL;
-          } else {
-            this.$emit('user', null);
-            this.setUser(null);
-          }
-        });
-      },
+      //       this.name = user.displayName;
+      //       this.email = user.email;
+      //       this.photoUrl = user.photoURL;
+      //     } else {
+      //       this.$emit('user', null);
+      //       this.setUser(null);
+      //     }
+      //   });
+      // },
       toggleEdit() {
         this.editing = !this.editing;
       },
@@ -94,6 +95,11 @@
     },
     created() {
       this.observeAuthState();
+    },
+    computed: {
+        user() {
+            return this.$store.getters.getCurrUser;
+        },  
     },
   };
   </script>
