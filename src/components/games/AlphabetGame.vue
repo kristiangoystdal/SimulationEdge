@@ -21,7 +21,7 @@
   <div id="other">
     <div id="user">
       <div id="timer">Time: {{ formattedTimer }} seconds</div>
-      <div id="done-text">{{ doneText }}</div>
+      <div id="done-text" v-if="done">{{ doneText }}</div>
       <v-btn id="reset-button" @click="reset">
         Reset
       </v-btn>
@@ -30,16 +30,21 @@
 
       <div id="userList" v-if="user">
         <div id="userTitle">Personal Best</div>
-        <div id="list">
+        <div id="list" v-if="!noscores">
           <ul>
-            <li v-for="(item, index) in userScores" :key="index">
-              {{ item }}
+            <li v-for="(value, key) in userScores" :key="key">
+                {{ value }} - {{ key }}
             </li>
           </ul>
         </div>
+        <div v-else>
+          You have no scores yet...
+        </div>
       </div>
 
-      <div v-else>Sign in to save scores</div>
+      <div v-else>
+        Sign in to save scores
+      </div>
       
     </div>
     <div id="highscoreBoard">
@@ -73,68 +78,41 @@
   
 <script>
   import TitleVue from '../extra/Title.vue';
-  import { getDatabase, ref, onValue } from 'firebase/database';
-  // import { getAuth, onAuthStateChanged} from "firebase/auth"
-
- 
+  import { getDatabase, ref, onValue, set} from 'firebase/database';
+  // import firebaseConfig from '../../js/firebaseConfig.js'
+  
+  const db = getDatabase();
 
   export default {
     data() {
       return {
         alphabet: "abcdefghijklmnopqrstuvwxyz".split(""),
         input: "".split(""),
-        inputValue: "",
         currentIndex: 0,
         startTime: null,
-        endTime: null,
         timer: 0,
         intervalId: null,
-        doneText: "Done",
+        doneText: "Congratulations! You did it!",
+        done: false,
         win: null,
         pageTitle: "The Alphabet Game",
         topScores: {},
         latestScores: {},
-        user: null,
-        userScores: [
-          "Item 1",
-          "Item 2",
-          "Item 3",          
-          "Item 4",
-          "Item 5",
-          "Item 6",
-          "Item 7",
-
-          // Add your items here, up to 20
-        ],
-
+        userScores: {},
+        noscores: false,
       };
     },
     components: {
-      TitleVue
+      TitleVue,
     },
     created() {
-      // this.startTimer();
-
-      // Check the authentication state when the component is created
-      // onAuthStateChanged(this.$fireAuth, (user) => {
-      //   this.user = user;
-      // });
-
-      // Reference to your Firebase database
-      const db = getDatabase();
       const topScoresRef = ref(db, '/games/alphabetgame/highscores');
 
-      // Listen for changes in the 'topScores' data
       onValue(topScoresRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
-          // Convert the dictionary to an array of objects
           const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
-
-          // Sort the array by value in ascending order (lowest value first)
           dataArray.sort((a, b) => a.value - b.value);
-
-          // Convert the sorted array back to a dictionary
           this.topScores = {};
           dataArray.forEach((item) => {
             this.topScores[item.key] = item.value;
@@ -144,31 +122,55 @@
 
       const latestScoresRef = ref(db, '/games/alphabetgame/latestScores');
 
-      // Listen for changes in the 'topScores' data
       onValue(latestScoresRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
-          // Convert the dictionary to an array of objects
           const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
-
-          // Sort the array by value in ascending order (lowest value first)
           dataArray.sort((a, b) => a.value - b.value);
-
-          // Convert the sorted array back to a dictionary
           this.latestScores = {};
           dataArray.forEach((item) => {
             this.latestScores[item.key] = item.value;
           });
         }
       });
+
+      const uid = this.user.uid;
+      const userScoresRef = ref(db, `/users/${uid}/alphabetScores`);
+
+      onValue(userScoresRef, (snapshot) => {
+        if(snapshot.exists()){
+          this.noscores = false;
+          const data = snapshot.val();
+
+          if (data) {
+            const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
+            dataArray.sort((a, b) => a.value - b.value);
+            this.userScores = {};
+            dataArray.forEach((item) => {
+              const dateStr = item.key;
+              const modifiedDateStr = dateStr.replace(/q/g, '-').replace(/e/g, ' ').replace(/w/g, ':');
+
+              this.userScores[modifiedDateStr] = item.value;
+            });
+          }
+        } 
+        else{
+          this.noscores = true;
+        }       
+        
+      });
     },
     computed: {
       formattedTimer() {
         return this.timer.toFixed(2);
-      }
+      },
+      user() {
+        return this.$store.getters.getCurrUser;
+      },
     },
     methods: {
       startTimer() {
+        this.startTime = new Date();
         this.intervalId = setInterval(() => {
           if (this.startTime) {
             const now = new Date();
@@ -177,73 +179,79 @@
           }
         }, 10);
       },
-      changeLetter() {
+      stopTimer() {
+        clearInterval(this.intervalId);
+      },
+      handleKeyDown(event) {
         if (event.key === 'Backspace') {
-          // Check if Backspace key was pressed
           if (this.currentIndex > 0) {
-            // Only remove the last item if there are items to remove
             this.currentIndex--;
-            this.input[this.currentIndex] = ""; // Clear the last item
+            this.input = this.input.replace(/.$/, '');
           }
-        } else {
-          this.input[this.currentIndex] = this.inputValue.toLowerCase();
-          this.inputValue = "";
+        } 
+        else if (this.currentIndex < this.alphabet.length) {
+          if (event.key.toLowerCase() === 'a' && this.currentIndex === 0) {
+            this.startTimer();
+          }
+
+          this.input += event.key;
           this.currentIndex++;
+          this.checkWin()
         }
       },
-      checkWin(){
-        win = true;
-        for(i = 0; i<this.alphabet.length; i++){
-          if(input[i]!=this.alphabet[i]){
+      async checkWin() {
+        let win = true;
+        for (let i = 0; i < this.alphabet.length; i++) {
+          if (this.input[i] !== this.alphabet[i]) {
             win = false;
             break;
           }
         }
-      },
-      checkLetter() {
-        const currentLetter = this.alphabet[this.currentIndex];
-        if (this.inputValue.toLowerCase() === currentLetter) {
-          if (currentLetter === "a" && this.currentIndex === 0) {
-            this.startTime = new Date();
-          }
-  
-          this.currentIndex++;
-          this.inputValue = "";
-  
-          if (currentLetter === "z") {
-            this.endTime = new Date();
-            this.calculateTimeDifference();
-            this.stopTimer();
-          }
+        if (win) {
+          this.stopTimer();
+          this.done = true;
+
+          if (this.user) {
+            const uid = this.user.uid;
+            const date = new Date();
+            const datepath = date.getDate()+'q'+date.getMonth()+'q'+date.getFullYear()+'e'+date.getHours()+'w'+date.getMinutes(); 
+            // q = '-'
+            // e = ' '
+            // w = ':'
+
+            const time = this.timer.toFixed(2);
+            const path = `/users/${uid}/alphabetScores/${datepath}`;
+            console.log(path);
+
+
+            // Add the timer value under the "alphabetScores" subfolder
+            set(ref(db, path), time).then(() => {
+              // Data added successfully
+            }).catch((error) => {
+              console.error('Error adding data:', error);
+            });
+              }
         }
       },
-      calculateTimeDifference() {
-        const diff = this.endTime - this.startTime;
-        this.timer = Math.floor(diff / 10) / 100;
-        this.doneText = `Congratulations! You completed the alphabet in ${this.timer.toFixed(2)} seconds.`;
-      },
-      stopTimer() {
-        clearInterval(this.intervalId);
-      },
+
       reset() {
         this.input = "";
-        this.inputValue = "";
         this.currentIndex = 0;
         this.timer = 0;
-        this.doneText = "";
         this.startTime = null;
-        this.endTime = null;
         this.intervalId = null;
-        this.alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
-      }
-    },computed: {
-        user() {
-            return this.$store.getters.getCurrUser;
-        },
-        
+        this.done = false;
+      },
+    },
+    mounted() {
+      document.addEventListener('keydown', this.handleKeyDown);
+    },
+    beforeUnmount() {
+      document.removeEventListener('keydown', this.handleKeyDown);
     },
   };
 </script>
+
 
 <style scoped>
     * {
