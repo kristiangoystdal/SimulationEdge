@@ -81,9 +81,6 @@
         createUserWithEmailAndPassword,
         setPersistence,
         browserLocalPersistence,
-        GoogleAuthProvider,
-        signInWithPopup,
-        FacebookAuthProvider,
     } from "firebase/auth";
     import { mapActions } from 'vuex';
     
