@@ -14,7 +14,7 @@ dist-ssr
 coverage
 *.local
 
-src/js/
+src/js/firebaseConfig.js
 src/main.js
 
 /cypress/videos/
