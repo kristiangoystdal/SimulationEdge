@@ -221,8 +221,6 @@
 
             const time = this.timer.toFixed(2);
             const path = `/users/${uid}/alphabetScores/${datepath}`;
-            console.log(path);
-
 
             // Add the timer value under the "alphabetScores" subfolder
             set(ref(db, path), time).then(() => {
