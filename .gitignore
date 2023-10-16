@@ -15,7 +15,6 @@ coverage
 *.local
 
 src/js/firebaseConfig.js
-src/main.js
 
 /cypress/videos/
 /cypress/screenshots/
