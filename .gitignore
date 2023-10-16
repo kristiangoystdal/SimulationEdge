@@ -30,4 +30,3 @@ src/main.js
 *.sln
 *.sw?
 *.env
-*.js
