@@ -177,7 +177,7 @@
             const diff = (now - this.startTime) / 1000;
             this.timer = diff;
           }
-        }, 10);
+        }, 1);
       },
       stopTimer() {
         clearInterval(this.intervalId);
@@ -199,7 +199,7 @@
           this.checkWin()
         }
       },
-      async checkWin() {
+      checkWin() {
         let win = true;
         for (let i = 0; i < this.alphabet.length; i++) {
           if (this.input[i] !== this.alphabet[i]) {
@@ -214,7 +214,7 @@
           if (this.user) {
             const uid = this.user.uid;
             const date = new Date();
-            const datepath = date.getDate()+'q'+date.getMonth()+'q'+date.getFullYear()+'e'+date.getHours()+'w'+date.getMinutes(); 
+            const datepath = date.getDate()+'q'+date.getMonth()+'q'+date.getFullYear()+'e'+date.getHours()+'w'+date.getMinutes()+'w'+date.getSeconds(); 
             // q = '-'
             // e = ' '
             // w = ':'
