@@ -19,67 +19,72 @@
   </v-container>
 
   <div id="other">
-    <div id="user">
-      <div id="timer">Time: {{ formattedTimer }} seconds</div>
-      <div id="done-text" v-if="done">{{ doneText }}</div>
-      <v-btn id="reset-button" @click="reset">
-        Reset
-      </v-btn>
-      
-      
+    <div id="otherbox">
+      <div id="user">
+        <div id="timer">Time: {{ formattedTimer }} seconds</div>
+        <div id="done-text" v-if="done">{{ doneText }}</div>
+        <v-btn id="reset-button" @click="reset">
+          Reset
+        </v-btn>
+        
+        
 
-      <div id="userList" v-if="user">
-        <div id="userTitle">Personal Best</div>
-        <div id="list" v-if="!noscores">
-          <ul>
-            <li v-for="(value, key) in userScores" :key="key">
-                {{ value }} - {{ key }}
-            </li>
-          </ul>
+        <div id="userList" v-if="user">
+          <div id="userTitle">Personal Best</div>
+          <div id="list" v-if="!noscores">
+            <ul>
+              <li v-for="(value, key) in userScores" :key="key">
+                  {{ value }} - {{ key }}
+              </li>
+            </ul>
+          </div>
+          <div v-else>
+            You have no scores yet...
+          </div>
         </div>
+
         <div v-else>
-          You have no scores yet...
+          Sign in to save scores
+        </div>
+        
+      </div>
+    </div>
+    
+    <div id="otherbox">
+      <div id="highscoreBoard">
+        <div id="highscoreTitle">Highscores</div>
+        <div id="type">
+          <div id="topList">
+            <div id="topTitle">Top</div>
+            <div id="list">
+              <ul>
+                <li v-for="(value, key) in topScores" :key="key">
+                  {{ value }} - {{ key }}
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div id="latestList">
+            <div id="latestTitle">Latest</div>
+            <div id="list">
+              <ul>
+                <li v-for="(item, index) in latestScores" :key="index">
+                  {{ item.value }} - {{ item.key }}
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div v-else>
-        Sign in to save scores
-      </div>
-      
-    </div>
-    <div id="highscoreBoard">
-      <div id="highscoreTitle">Highscores</div>
-      <div id="type">
-        <div id="topList">
-          <div id="topTitle">Top</div>
-          <div id="list">
-            <ul>
-              <li v-for="(value, key) in topScores" :key="key">
-                {{ value }} - {{ key }}
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div id="latestList">
-          <div id="latestTitle">Latest</div>
-          <div id="list">
-            <ul>
-              <li v-for="(value, key) in latestScores" :key="key">
-                {{ value }} - {{ key }}
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
     
 </template>
   
 <script>
   import TitleVue from '../extra/Title.vue';
-  import { getDatabase, ref, onValue, set} from 'firebase/database';
-  // import firebaseConfig from '../../js/firebaseConfig.js'
+  import { getDatabase, ref, onValue, set, remove} from 'firebase/database';
   
   const db = getDatabase();
 
@@ -97,7 +102,7 @@
         win: null,
         pageTitle: "The Alphabet Game",
         topScores: {},
-        latestScores: {},
+        latestScores: [],
         userScores: {},
         noscores: false,
       };
@@ -126,10 +131,13 @@
         const data = snapshot.val();
         if (data) {
           const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
-          dataArray.sort((a, b) => a.value - b.value);
           this.latestScores = {};
           dataArray.forEach((item) => {
-            this.latestScores[item.key] = item.value;
+            const keyParts = item.key.split(',');
+            const key = keyParts[0];
+            const value = item.value;
+
+            this.latestScores.push({ key, Value: value }); 
           });
         }
       });
@@ -228,10 +236,39 @@
             }).catch((error) => {
               console.error('Error adding data:', error);
             });
-              }
+
+            const displayPath = `${this.user.displayName}`+','+ `${datepath}` ;
+            // ',' = remove on load
+            const latestPath = `/games/alphabetgame/latestScores/`+displayPath;
+
+            // Add the timer value under the "latestScores" subfolder
+            set(ref(db, latestPath), time).then(() => {
+              // Data added successfully
+            }).catch((error) => {
+              console.error('Error adding data:', error);
+            });
+          }
         }
       },
+      updateTopScores (){
+        const time = this.timer.toFixed(2);
+        const path = `/users/${uid}/alphabetScores/${datepath}`;
+        const latestPath = `/games/alphabetgame/latestScores/${this.user.displayName}`;
 
+
+        // Add the timer value under the "alphabetScores" subfolder
+        set(ref(db, path), time).then(() => {
+          // Data added successfully
+        }).catch((error) => {
+          console.error('Error adding data:', error);
+        });
+        // Add the timer value under the "alphabetScores" subfolder
+        set(ref(db, latestPath), time).then(() => {
+          // Data added successfully
+        }).catch((error) => {
+          console.error('Error adding data:', error);
+        });
+      },
       reset() {
         this.input = "";
         this.currentIndex = 0;
@@ -312,18 +349,22 @@
       margin: 2vw auto;
       text-align: center;
     }
-    #user{
-      width: 45%;  
-      height: auto;  
+    #otherbox{
+      width: 45%; 
       margin: 2vw auto;
       margin-top: 0;
+    }
+    #user{
+      width: 100%;  
+      height: auto;  
+      
       border: solid;
       text-align: center;
       border-radius: 20px;
       background-color: bisque;
     }
     #highscoreBoard{
-      width: 45%;  
+      width: 100%;  
       height: auto;  
       margin: 2vw auto;
       margin-top: 0;

@@ -8,6 +8,17 @@
             @submit.prevent="onSubmit"
             id="registerForm"
         >
+            <!-- Username Input Field -->
+            <v-text-field
+            v-model="username"
+            :readonly="loading"
+            :rules="[rules.required]"
+            clearable
+            label="Username"
+            placeholder="Enter your username"
+            >
+            </v-text-field>
+
             <!-- E-mail Input field -->
             <v-text-field
             v-model="email"
@@ -81,6 +92,7 @@
         createUserWithEmailAndPassword,
         setPersistence,
         browserLocalPersistence,
+        updateProfile,
     } from "firebase/auth";
     import { mapActions } from 'vuex';
     
@@ -110,6 +122,11 @@
                     return createUserWithEmailAndPassword(auth, email_signin, password_signin);
                 })
                 .then((userCredential) => {
+                    updateProfile(auth.currentUser, {
+                        displayName: this.username, photoURL: ""
+                    }).catch((error) => {
+                        alert(error.message);
+                    });
                     // Registration successful
                     const user = userCredential.user;
                     this.$emit('user', user);
@@ -127,6 +144,7 @@
         data() {
             return {
                 form: false,
+                username: null,
                 email: null,
                 password1: null,
                 password2: null,

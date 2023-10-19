@@ -1,6 +1,8 @@
-<template>  
+<template>
+    <div>{{ user.displayName }}</div>  
     <div id="logout-box">
       <input type="submit" id="logOut" name="logOut" value="Log Out" @click="logOut">
+      
     </div>
 </template>
     
@@ -19,6 +21,11 @@
                     this.$router.push('/');
                 })
             }
+        },
+        computed: {
+          user() {
+            return this.$store.getters.getCurrUser;
+          },
         },
     }
 </script>
