@@ -27,8 +27,6 @@
           Reset
         </v-btn>
         
-        
-
         <div id="userList" v-if="user">
           <div id="userTitle">Personal Best</div>
           <div id="list" v-if="!noscores">
@@ -58,8 +56,8 @@
             <div id="topTitle">Top</div>
             <div id="list">
               <ul>
-                <li v-for="(value, key) in topScores" :key="key">
-                  {{ value }} - {{ key }}
+                <li v-for="(item, key) in topScores" :key="key">
+                  {{ item[1] }} - {{ item[0] }}
                 </li>
               </ul>
             </div>
@@ -68,8 +66,8 @@
             <div id="latestTitle">Latest</div>
             <div id="list">
               <ul>
-                <li v-for="(item, index) in latestScores" :key="index">
-                  {{ item[1] }} - {{ item[0] }}
+                <li v-for="(value, key) in latestScores" :key="key">
+                  {{ value }} - {{ key }}
                 </li>
               </ul>
             </div>
@@ -101,8 +99,8 @@
         done: false,
         win: null,
         pageTitle: "The Alphabet Game",
-        topScores: {},
-        latestScores: [], 
+        topScores: [],
+        latestScores: {}, 
         userScores: {},
         noscores: false,
       };
@@ -119,9 +117,15 @@
           const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
           dataArray.sort((a, b) => a.value - b.value);
           this.topScores = {};
+          var index = 0;
           dataArray.forEach((item) => {
-            this.topScores[item.key] = item.value;
+            const keyParts = item.key.split(',');
+            const key = keyParts[0];
+            const value = item.value;
+            this.topScores[index] = [key, value];
+            index = index + 1;
           });
+
         }
       });
 
@@ -132,21 +136,18 @@
         if (data) {
           const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
           this.latestScores = {};
-          var index = 0;
           dataArray.forEach((item) => {
             const keyParts = item.key.split(',');
             const key = keyParts[0];
             const value = item.value;
-
-            this.latestScores[index] = [key, value];
-            console.log[this.latestScores[index][0]]; 
-            index = index+1;
+            this.latestScores[key] = value;
           });
         }
       });
 
       if(this.$store.getters.getCurrUser!=null){
-        const uid = this.user.uid;
+        const tempUser = this.$store.getters.getCurrUser;
+        const uid = tempUser.uid;
         const userScoresRef = ref(db, `/users/${uid}/alphabetScores`);
 
         onValue(userScoresRef, (snapshot) => {
@@ -170,7 +171,8 @@
             this.noscores = true;
           }       
           
-        });}
+        });
+      }
       
     },
     computed: {
@@ -252,27 +254,61 @@
             }).catch((error) => {
               console.error('Error adding data:', error);
             });
+
+
+            const topPath = `/games/alphabetgame/highscores/`+displayPath;
+
+            // Add the timer value under the "highscores" subfolder
+            set(ref(db, topPath), time).then(() => {
+              // Data added successfully
+              this.updateTopScores();
+            }).catch((error) => {
+              console.error('Error adding data:', error);
+            });
+
           }
         }
       },
       updateTopScores (){
-        const time = this.timer.toFixed(2);
-        const path = `/users/${uid}/alphabetScores/${datepath}`;
-        const latestPath = `/games/alphabetgame/latestScores/${this.user.displayName}`;
+        const highScoresRef = ref(db, '/games/alphabetgame/highscores');
+        const maxCount = 50;
 
+        onValue(highScoresRef, (snapshot) => {
+          const data = snapshot.val();
 
-        // Add the timer value under the "alphabetScores" subfolder
-        set(ref(db, path), time).then(() => {
-          // Data added successfully
-        }).catch((error) => {
-          console.error('Error adding data:', error);
+          if (data) {
+            const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
+
+            // Sort the array in descending order (highest to lowest)
+            dataArray.sort((a, b) => b.value.score - a.value.score);
+
+            if (dataArray.length > maxCount) {
+              const itemsToRemove = dataArray.slice(maxCount);
+              
+              itemsToRemove.forEach((item) => {
+                const key = item.key;
+                remove(ref(db, `/games/alphabetgame/highscores/${key}`));
+              });
+            }
+          }
         });
-        // Add the timer value under the "alphabetScores" subfolder
-        set(ref(db, latestPath), time).then(() => {
-          // Data added successfully
-        }).catch((error) => {
-          console.error('Error adding data:', error);
-        });
+        
+      },
+      insertRandomValues(){
+        for(var i = 0; i<20; i++){
+          console.log(i)
+          const randomFloat = Math.random();
+          const path = randomFloat.toString().replace(/\./g, '');
+          const topPath = `/games/alphabetgame/highscores/`+ path;
+
+          // Add the timer value under the "highscores" subfolder
+          set(ref(db, topPath), randomFloat).then(() => {
+            // Data added successfully
+          }).catch((error) => {
+            console.error('Error adding data:', error);
+          });
+        }
+        
       },
       reset() {
         this.input = "";
