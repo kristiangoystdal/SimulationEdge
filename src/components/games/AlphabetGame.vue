@@ -69,7 +69,7 @@
             <div id="list">
               <ul>
                 <li v-for="(item, index) in latestScores" :key="index">
-                  {{ item.value }} - {{ item.key }}
+                  {{ item[1] }} - {{ item[0] }}
                 </li>
               </ul>
             </div>
@@ -102,7 +102,7 @@
         win: null,
         pageTitle: "The Alphabet Game",
         topScores: {},
-        latestScores: [],
+        latestScores: [], 
         userScores: {},
         noscores: false,
       };
@@ -132,41 +132,46 @@
         if (data) {
           const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
           this.latestScores = {};
+          var index = 0;
           dataArray.forEach((item) => {
             const keyParts = item.key.split(',');
             const key = keyParts[0];
             const value = item.value;
 
-            this.latestScores.push({ key, Value: value }); 
+            this.latestScores[index] = [key, value];
+            console.log[this.latestScores[index][0]]; 
+            index = index+1;
           });
         }
       });
 
-      const uid = this.user.uid;
-      const userScoresRef = ref(db, `/users/${uid}/alphabetScores`);
+      if(this.$store.getters.getCurrUser!=null){
+        const uid = this.user.uid;
+        const userScoresRef = ref(db, `/users/${uid}/alphabetScores`);
 
-      onValue(userScoresRef, (snapshot) => {
-        if(snapshot.exists()){
-          this.noscores = false;
-          const data = snapshot.val();
+        onValue(userScoresRef, (snapshot) => {
+          if(snapshot.exists()){
+            this.noscores = false;
+            const data = snapshot.val();
 
-          if (data) {
-            const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
-            dataArray.sort((a, b) => a.value - b.value);
-            this.userScores = {};
-            dataArray.forEach((item) => {
-              const dateStr = item.key;
-              const modifiedDateStr = dateStr.replace(/q/g, '-').replace(/e/g, ' ').replace(/w/g, ':');
+            if (data) {
+              const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
+              dataArray.sort((a, b) => a.value - b.value);
+              this.userScores = {};
+              dataArray.forEach((item) => {
+                const dateStr = item.key;
+                const modifiedDateStr = dateStr.replace(/q/g, '-').replace(/e/g, ' ').replace(/w/g, ':');
 
-              this.userScores[modifiedDateStr] = item.value;
-            });
-          }
-        } 
-        else{
-          this.noscores = true;
-        }       
-        
-      });
+                this.userScores[modifiedDateStr] = item.value;
+              });
+            }
+          } 
+          else{
+            this.noscores = true;
+          }       
+          
+        });}
+      
     },
     computed: {
       formattedTimer() {
@@ -365,7 +370,7 @@
     }
     #highscoreBoard{
       width: 100%;  
-      height: auto;  
+          height: auto;  
       margin: 2vw auto;
       margin-top: 0;
       border: solid;
