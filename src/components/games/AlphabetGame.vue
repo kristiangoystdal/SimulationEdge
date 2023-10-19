@@ -397,8 +397,7 @@
     }
     #user{
       width: 100%;  
-      height: auto;  
-      
+      height: auto;       
       border: solid;
       text-align: center;
       border-radius: 20px;
@@ -439,6 +438,7 @@
       border-radius: 20px;
       padding-bottom: 20px;
     }
+    
     #userTitle{
       border-bottom: solid;
       margin: 0.5vw 0;
@@ -482,6 +482,19 @@
       text-align: left;
       padding-left: 40px;
       padding-bottom: 20px;
+      max-height: 400px;
+      overflow-y: scroll;
+    }
+    #list::-webkit-scrollbar {
+        width: 0.5vw;
+    }
+    #list::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+        border-radius: 10px;
+    }
+    #list::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
     }
     li{
       list-style: decimal;
