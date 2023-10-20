@@ -482,7 +482,7 @@
       text-align: left;
       padding-left: 40px;
       padding-bottom: 20px;
-      max-height: 400px;
+      max-height: 300px;
       overflow-y: scroll;
     }
     #list::-webkit-scrollbar {
