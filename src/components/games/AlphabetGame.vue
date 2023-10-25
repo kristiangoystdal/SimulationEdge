@@ -204,6 +204,9 @@
             this.input = this.input.replace(/.$/, '');
           }
         } 
+        else if (event.key === 'Escape') {
+          this.reset();
+        } 
         else if (this.currentIndex < this.alphabet.length) {
           if (event.key.toLowerCase() === 'a' && this.currentIndex === 0) {
             this.startTimer();
