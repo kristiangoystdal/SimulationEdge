@@ -4,7 +4,7 @@
 </template>
   
   <script>
-    import GamesGallery from '../../components/GamesGallery.vue'
+    import GamesGallery from '../../components/games/GamesGallery.vue'
 
     export default{
       name: "GamesPage", 

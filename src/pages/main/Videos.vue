@@ -3,7 +3,7 @@
 </template>
     
 <script>
-    import DevelopmentComp from '../../components/DevelopmentComp.vue'
+    import DevelopmentComp from '../../components/main/DevelopmentComp.vue'
 
     export default{
         name: "VideosPage", 

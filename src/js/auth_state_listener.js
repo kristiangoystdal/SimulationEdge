@@ -11,3 +11,6 @@ onAuthStateChanged(auth, (user) => {
     curUser.value = null
   }
 });
+
+
+

@@ -1,12 +1,11 @@
 <template v-slot:header>
-    <v-app-bar :elevation="0">HEader</v-app-bar>
     <header>
         <div class="logo">
             <a href="/" target="_top">
-                <img src="../assets/photos/Logo_siden.png" alt="Logo" target="_top" href='/'>
+                <img src="../../assets/photos/Logo_siden.png" alt="Logo" target="_top" href='/'>
             </a>
         </div>
-        <div v-if="!mobile">
+        <div v-if="isScreenWideEnough">
             <nav>	
                 <ul class="nav-menu">
                     <li v-for="item in menu" :key="item.name">
@@ -21,7 +20,7 @@
         </div>
         <div v-else>
             <div id="menu-button">
-                <img src="../assets/photos/Hamburger_icon.png" alt="Hamburger Icon" @click="toggleMenu">
+                <img src="../../assets/photos/Hamburger_icon.png" alt="Hamburger Icon" @click="toggleMenu">
                 <div v-if="menuState" id="menu">
                     <li v-for="item in menu" :key="item.name">
                         <router-link v-if="!item.hasOwnProperty('userState')" class="menuItem" :to="item.url" @click="toggleMenu">{{ item.name }}</router-link>
@@ -30,7 +29,7 @@
                             <router-link v-if="user" class="menuItem" to="/account" @click="toggleMenu">Account</router-link>
                         </div>
                     </li>
-                    <img src="../assets/photos/x.svg" id="menuClose" alt="Close Button" @click="toggleMenu">
+                    <v-icon icon="mdi-close" size="15vw" id="menuClose" @click="toggleMenu"></v-icon>
                 </div>
             </div>
         </div>
@@ -62,6 +61,7 @@ export default {
             ],
             menuState: false,
             mobile: false,
+            isScreenWideEnough: false,
         }
     },
     methods:{
@@ -80,29 +80,30 @@ export default {
                 }
             });
         },
-        isMobile() {
-
-            // const mediaQuery = window.matchMedia('(min-width: 768px)')
-            if(window.innerWidth < 768) {
-                this.mobile = true;
-                return true
-            } else {
-                this.mobile = false;
-                return false
-            }
+        checkScreenWidth() {
+            this.isScreenWideEnough = window.innerWidth >= 768; // Adjust the threshold as needed
         },
         toggleMenu(){
             this.menuState = !this.menuState
         },
     },
     created() {
-      this.observeAuthState();
-      this.isMobile();
+        this.observeAuthState();
+        // Call the method to check screen width initially
+        this.checkScreenWidth();
+
+        // Add a window resize event listener to update the screen width check
+        window.addEventListener('resize', this.checkScreenWidth);
+    },
+    beforeDestroy() {
+        // Remove the event listener when the component is destroyed to prevent memory leaks
+        window.removeEventListener('resize', this.checkScreenWidth);
     },
     computed: {
         user() {
             return this.$store.getters.getCurrUser;
         },
+        
     },
 }
 </script>
@@ -126,7 +127,7 @@ export default {
         }
         
         .logo{
-            height: 50%;
+            height: 100%;
             padding: 1%;
             position: relative;
         }
@@ -179,7 +180,7 @@ export default {
             font-display: auto;
             font-weight: 400;
             font-style: normal;
-            src: url('../assets/fonts/FredokaOne-Regular.ttf') format('truetype');
+            src: url('../../assets/fonts/FredokaOne-Regular.ttf') format('truetype');
         }
 
         .link{
@@ -237,9 +238,11 @@ export default {
             height: auto;
             cursor: pointer;
             margin-right: 2vw;
+            z-index: 101;
         }
 
         #menu{
+            z-index: 100;
             display: inline-block;
             position: absolute;
             margin: auto;
@@ -255,8 +258,6 @@ export default {
             align-items: center;
             justify-content: center;
         }
-        
-
         .menuItem {
             text-decoration: none;
             color: white;
@@ -272,7 +273,7 @@ export default {
 
         @font-face {
             font-family: 'TitleFont';
-            src: url('/src/assets/fonts/FredokaOne-Regular.ttf');
+            src: url('../../assets/fonts/FredokaOne-Regular.ttf');
         }
 
         .link{
@@ -281,9 +282,8 @@ export default {
         }
 
         #menuClose{
-            width: 10vw;
-            height: auto;
-            padding: 10vw;    
+            width: 2vw;
+            height: auto;  
         }
 
         .slide-enter-active, .slide-leave-active {

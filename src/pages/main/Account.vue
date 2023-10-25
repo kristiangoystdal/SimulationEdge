@@ -1,11 +1,11 @@
 <template>
-  <UserData></UserData>
+  <!-- <UserData></UserData> -->
   <SignOut></SignOut>
 </template>
   
   <script>
-    import SignOut from '../../components/SignOut.vue'
-    import UserData from '../../components/UserData.vue'
+    import SignOut from '../../components/user/SignOut.vue'
+    import UserData from '../../components/user/UserData.vue'
 
     export default{
       name: "AccountPage", 

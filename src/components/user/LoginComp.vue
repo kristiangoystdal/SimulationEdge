@@ -1,46 +1,76 @@
 <template>
-    <div id="box">
+
+    <v-sheet class="sheet" style="max-width: 400px" id="center" rounded >
         <div id="login">Login</div>
-    
-        <div id="form">
-            <!-- Email input -->
-            <div id="emailBox">
-                <input type="text" id="email" name="email" placeholder="E-mail" ref="email_signin">
-            </div>
-    
-            <!-- Password input -->
-            <div id="passwordBox1">
-                <input type="text" id="password" name="password" placeholder="Password" ref="password_signin" @input="passwordChecker">
-            </div>
 
-            <div id="errorMessages">
-                <div v-if="emailNotValidated">E-mail is not a valid e-mail address</div>
-                <div v-if="WrongInfo">Email and password doesn't match</div>
-            </div>
+        <v-form
+            v-model="form"
+            @submit.prevent="onSubmit"
+            id="loginForm"
+        >
+            <!-- E-mail Input field -->
+            <v-text-field
+            v-model="email"
+            :readonly="loading"
+            :rules="[rules.required, rules.email]"
+            class="mb-2"
+            clearable
+            label="Email"
+            ></v-text-field>
 
-            <!-- Login button -->
-            <input type="submit" id="loginButton" name="login_Submit" value="Sign in" @click="login">
+            <!-- Password Input field -->
+            <v-text-field
+            v-model="password"
+            :readonly="loading"
+            :rules="[rules.required]"
+            clearable
+            label="Password"
+            placeholder="Enter your password"
+            :type="show ? 'text' : 'password'"
+            :append-inner-icon="show ? 'mdi-eye' : 'mdi-eye-off'"     
+            @click:append-inner="show=!show"
+            >
+            </v-text-field>
+
+            <br>
+
+
+            <v-btn
+            :disabled="!form"
+            :loading="loading"
+            block
+            color="success"
+            size="large"
+            type="submit"
+            variant="elevated"
+            @click="login"
+            >
+            Sign In
+            </v-btn>
+        </v-form>
+        <br>
+
+        <div id="link">
+            <router-link to="/register">Register here</router-link>
         </div>
-                
-        <div id="social">
-            <span class="loginWith">Sign in with:</span><br>
-    
+        <br>
+
+        <div id="social">  
             <!-- Facebook login button -->
             <div class="social-signin_facebook" @click="signInWithFacebook">
-                <img src="../assets/photos/facebook_logo-transparent.png" alt="facebook_logo">
+                <img src="../../assets/photos/facebook_logo-transparent.png" alt="facebook_logo">
             </div>
                 
             <!-- Google login button -->
             <div class="social-signin_google" @click="signInWithGoogle">
-                <img src="../assets/photos/google_logo.png" alt="google_logo">
+                <img src="../../assets/photos/google_logo.png" alt="google_logo">
             </div>
         </div>
-  
+        
         <!-- Registration link -->
-        <div id="registerLink">
-            <router-link to="/register">Register here</router-link>
-        </div>
-    </div>
+        
+    </v-sheet>
+    
   </template>
   
 <script>
@@ -59,70 +89,39 @@
   
         methods: {
             ...mapActions(['setUser']),
-
-            // Validate email format
-            validateEmail() {
-                const emailInput = document.getElementById("email").value;
-                // Regular expression to check if the input is a valid email address
-                const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-                return emailPattern.test(emailInput);
-            },
-            
-            // Validate input and trigger registration
-            inputValidater() {
-                this.passwordDifferent = false;
-                this.emailNotValidated = false;
-
-                var faultyRegister = false
                 
-                if (!this.validateEmail()) {
-                    this.emailNotValidated = true;
-                    faultyRegister = true;
-                }
-        
-                return !faultyRegister;
-            },
-    
             // Handle user login
             login() {
-                if(this.inputValidater()){
-                    const email_login = document.getElementById("email").value;
-                    const password_login = document.getElementById("password").value;
+                if (!this.form) return
 
-                    const auth = getAuth();
-            
-                    // Set persistence to LOCAL to enable persistent authentication
-                    setPersistence(auth, browserLocalPersistence)
-                        .then(() => {
-                            // Sign in with email and password
-                            return signInWithEmailAndPassword(auth, email_login, password_login);
-                        })
-                        .then((userCredential) => {
-                            // Login successful
-                            const user = userCredential.user;
-                            this.$emit('user', user);
-                            this.setUser(auth.currentUser);
-                            this.$router.push('/');
-                        })
-                        .catch((error) => {
-                            // Handle login error
-                            this.WrongInfo = true;
-                            console.log(error.code);
-                            // alert(error.message);
-                        });
-                }
-                else {
-                    console.log("Faulty login info");
-            
-                    // Shake animation
-                    const loginButton = document.getElementById('loginButton'); // Get the button by its id
-                    loginButton.classList.add('shake');
-            
-                    // Remove the shake class after the animation completes
-                    setTimeout(() => {
-                        loginButton.classList.remove('shake');
-                    }, 500); // Adjust the time (in milliseconds) to match your animation duration
-                }
+                this.loading = true
+
+                setTimeout(() => (this.loading = false), 2000)
+
+                const email_login = this.email;
+                const password_login = this.password;
+
+                const auth = getAuth();
+        
+                // Set persistence to LOCAL to enable persistent authentication
+                setPersistence(auth, browserLocalPersistence)
+                .then(() => {
+                    // Sign in with email and password
+                    return signInWithEmailAndPassword(auth, email_login, password_login);
+                })
+                .then((userCredential) => {
+                    // Login successful
+                    const user = userCredential.user;
+                    this.$emit('user', user);
+                    this.setUser(auth.currentUser);
+                    this.$router.push('/');
+                })
+                .catch((error) => {
+                    // Handle login error
+                    this.WrongInfo = true;
+                    console.log(error.code);
+                    // alert(error.message);
+                });
             },
     
             // Handle Google sign-in
@@ -161,16 +160,26 @@
                 });
             },
         },
-    
-        data() {
-            return {
-                loginComp: false,
-                passwordCheck: false,
-                passwordEmpty: true,
-                emailNotValidated: false,
-                WrongInfo: false
-            };
-        },
+        data: () => ({
+            form: false,
+            email: null,
+            password: null,
+            loading: false,
+            show: false,
+            rules:{
+                required: value => !!value || 'Field is required',
+                min: value => value.length >= 8 || 'Password must be min 8 characters',
+                digit: value => (/\d/.test(value)) || 'Password must include a number',
+                capital: value => (/[A-Z]/.test(value)) || 'Password must include a capital letter',
+                email: value => (/.+@.+\..+/.test(value)) || 'Email must be valid',
+                passwordmatch: value => value==this.password1 || "Password doesn't match",
+            },
+            loginComp: false,
+            passwordCheck: false,
+            passwordEmpty: true,
+            emailNotValidated: false,
+            WrongInfo: false
+        }),
     }
 </script>
   
@@ -193,24 +202,36 @@ div{
     100% { transform: translateX(5px); }
 }
 
-@media (max-width: 768px){
-    #box{
-        margin: 3vw auto;
-        width: 90vw;
-        height: 80vh;
-        /* border-color: green; */
-        border-radius: 10px;
-        border: solid;
-        background-color:#ac19e1;
-    }
+#center{
+    margin: auto;
+}
 
+.sheet{
+    max-width: 400px;
+    width: 90%;
+}
+
+
+img{
+    height: 100%;
+    width: 100%;
+}
+
+
+@media (min-width: 769px){
     #login{
-        font-size: 10vw;
-        padding-top: 15vw;
-        padding-bottom: 15vw;
+        font-size: 3vw;
+        padding-top: 3vw;
+        padding-bottom: 3vw;
         text-align: center;
         font-family: 'TitleFont', sans-serif;
         text-decoration: underline;
+        height: 10vw
+    }
+
+    #loginForm{
+        width: 90%;
+        margin: auto;
         height: auto;
     }
 
@@ -222,40 +243,12 @@ div{
         margin: auto;
         border-bottom: none;
     }
-    #emailBox, #passwordBox1, #passwordBox2{
-        /* padding-left: 5vw;    */
-        width: 100%;  
-        height: auto;
-        margin: auto;
-        border-radius: 1vw;
-        display: flex;
-    }
-    
-    #username, #email, #password{
-        width: 100%;
-        height: 10vw;
-        margin: 0.5vw auto;
-        font-size: auto;
-        border-radius: 1vw;
-        font-family: 'TitleFont', sans-serif;
-    }
-    
-    #loginButton{
-        width: 50%;
-        height: auto;
-        font-size: 5vw;
-        margin: 5vw 25%;
-        font-family: 'TitleFont', sans-serif;
-    }
 
     #social{
         height: auto;
         width: 100%;
         margin: auto;
-        /* border: solid; */
         border-top: dashed;
-        padding-top: 5vw;
-        background-color: #ac19e1;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -268,10 +261,10 @@ div{
     }
 
     .social-signin_facebook{
-        height: 15vw;
-        width: auto;
+        width: 20%;
+        height: auto;
         margin: 2vw;
-        padding: 2vw;
+        padding: 0.3vw;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -281,10 +274,10 @@ div{
         cursor: pointer;
     }
     .social-signin_google{
-        height: 15vw;
-        width: auto;
+        height: auto;
+        width: 20%;
         margin: 2vw;
-        padding: 2vw;
+        padding: 1vw;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -294,205 +287,96 @@ div{
         cursor: pointer;
     }
 
-
-    .social-text{
-        width: 70%;
-        font-size: 3.4vw;
-    }
-
-    img{
-        height: 100%;
-        width: 100%;
-    } 
-
-    #registerLink{
-        font-size: 6vw;
+    #link{
+        font-size: 1.4vw;
         text-align: center;
-        width: 50%;
         height: auto;
         font-family: 'TitleFont', sans-serif;
         padding-top: 0;
+        margin: auto;
+        color: black;
+    }
+}
+
+@media (max-width: 768px){
+    #login{
+        font-size: 10vw;
+        padding-top: 10vw;
         padding-bottom: 10vw;
-        margin: 5vw auto;
-        /* border: solid; */
-        align-items: center;
-        color: black;
-        text-decoration: underline;
-    }
-
-    #errorMessages{
-        background-color: #ff0000;
-        color: black;
-        font-size: 4vw;
         text-align: center;
-        width: auto;
-        height: auto;
-        border-radius: 1vw;
         font-family: 'TitleFont', sans-serif;
+        text-decoration: underline;
+        height: auto
     }
 
+    #loginForm{
+        width: 90%;
+        margin: auto;
+        height: auto;
+    }
 
+    #form{
+        padding: 5vw 0;
+        height: auto;
+        padding-bottom: 10vw;
+        width: 85%;
+        margin: auto;
+        border-bottom: none;
+    }
 
-    /* #login-box{
-        margin: 3vw auto;
-        width: 90vw;
-        height: 100vw;
-        border-color: green;
-        border-radius: 10px;
-        border: solid;
+    #social{
+        height: auto;
+        width: 100%;
+        margin: auto;
+        border-top: dashed;
         display: flex;
         align-items: center;
-        background-color:#ac19e1;
+        justify-content: center;
+        padding-top: 5vw;
+        padding-bottom: 5vw;
     }
-
-    #login-text{
-        text-decoration: underline;
-        font-size: 5vw;
-        margin-top: 7vw;
-    }
-
-    #left, #right{
-        width: 50%;
-        height: 100%;
-        text-align: center;
-        margin: 2vw auto;  
-    }
-    #left{
-        border-right: solid;
-        border-style: dashed;
-    }
-
-    #username, #email, #password{
-        width: 80%;
-        height: 5vw;
-        margin: 0.5vw;
-    }
-
-    #signup, #login{
-        width: 70%;
-        height: auto;
-        font-size: 4vw;
-        margin: 2vw auto;
-    }
-
     .loginWith{
+        display: none;
         width: 90%;
         font-size: 5vw;
         text-decoration: underline;
     }
 
     .social-signin_facebook{
-        height: 10vw;
-        width: 90%;
-        margin: 1vw auto;
+        width: 25%;
+        height: auto;
+        margin: 5vw;
+        padding: 0.7vw;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-radius: 2vw;
+        border-radius: 50%;
         border: solid;
         background-color: #2f7af4;
         cursor: pointer;
     }
     .social-signin_google{
-        height: 10vw;
-        width: 90%;
-        margin: 1vw auto;
+        height: auto;
+        width: 25%;
+        margin: 5vw;
+        padding: 1vw;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-radius: 2vw;
+        border-radius: 50%;
         border: solid;
         background-color: white;
         cursor: pointer;
     }
 
-    .social-text{
-        width: 70%;
-        font-size: 3.4vw;
+    #link{
+        font-size: 5vw;
+        text-align: center;
+        height: auto;
+        font-family: 'TitleFont', sans-serif;
+        padding-top: 0;
+        margin: auto;
+        color: black;
     }
-
-    img{
-        height: 50%;
-        width: auto;
-        margin: 4vw;
-    } */
-
 }
-/* #login-box{
-    margin: 3vw auto;
-    width: 30vw;
-    border-color: green;
-    border-radius: 10px;
-    border: solid;
-    display: flex;
-    background-color:#ac19e1;
-}
-
-#login-text{
-    text-decoration: underline;
-    font-size: 2vw;
-}
-
-#left, #right{
-    width: 50%;
-    text-align: center;
-    margin: 5px;  
-}
-#left{
-    border-right: solid;
-    border-style: dashed;
-}
-
-#username, #email, #password{
-    width: 80%;
-    height: 2vw;
-    margin: 0.5vw;
-}
-
-#signup, #login{
-    width: 70%;
-    height: auto;
-    font-size: 1.3vw;
-}
-
-.loginWith{
-    width: 90%;
-    font-size: 1.4vw;
-    text-decoration: underline;
-}
-
-.social-signin_facebook{
-    height: 3vw;
-    margin-top: 1vw;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 5px;
-    border: solid;
-    background-color: #2f7af4;
-}
-.social-signin_google{
-    height: 3vw;
-    margin-top: 1vw;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 5px;
-    border: solid;
-    background-color: white;
-}
-
-.social-text{
-    width: 70%;
-    font-size: 1.1vw;
-}
-
-img{
-    height: 50%;
-    width: auto;
-    margin: 1vw;
-} */
-
-
-
 </style>
