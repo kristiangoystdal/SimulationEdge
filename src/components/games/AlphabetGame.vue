@@ -82,9 +82,11 @@
   
 <script>
   import TitleVue from '../extra/Title.vue';
+  import { getAuth, onAuthStateChanged } from "firebase/auth";
   import { getDatabase, ref, onValue, set, remove} from 'firebase/database';
   
   const db = getDatabase();
+  const auth = getAuth();
 
   export default {
     data() {
@@ -103,12 +105,30 @@
         latestScores: {}, 
         userScores: {},
         noscores: false,
+        username: {},
       };
     },
     components: {
       TitleVue,
     },
     created() {
+      const userIDRef = ref(db, `/username`); // Add userId to the reference path
+      onValue(userIDRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          const dataArray = Object.entries(userData).map(([key, value]) => ({ key, value }));
+          this.username = {};
+          dataArray.forEach((item) => {
+            this.username[item.value] = item.key;
+            console.log(item.key + ":" + item.value)
+          });
+        }
+        else {
+          console.log("User data not found");
+          displayNameKey = "No username";
+        }
+      });
+
       const topScoresRef = ref(db, '/games/alphabetgame/highscores');
 
       onValue(topScoresRef, (snapshot) => {
@@ -119,10 +139,13 @@
           this.topScores = {};
           var index = 0;
           dataArray.forEach((item) => {
-            const keyParts = item.key.split(',');
+            const keyParts = item.key.split(':');
             const key = keyParts[0];
+            // console.log("Key: " + key)
             const value = item.value;
-            this.topScores[index] = [key, value];
+            const displayNameKey = this.username[key];
+
+            this.topScores[index] = [displayNameKey, value];
             index = index + 1;
           });
 
@@ -138,41 +161,18 @@
           this.latestScores = {};
           dataArray.forEach((item) => {
             const keyParts = item.key.split(',');
-            const key = keyParts[0];
+            const key = keyParts[0];            
+            const displayNameKey = this.username[key];
+
             const value = item.value;
-            this.latestScores[key] = value;
+            this.latestScores[displayNameKey] = value;
           });
         }
       });
 
-      if(this.$store.getters.getCurrUser!=null){
-        const tempUser = this.$store.getters.getCurrUser;
-        const uid = tempUser.uid;
-        const userScoresRef = ref(db, `/users/${uid}/alphabetScores`);
-
-        onValue(userScoresRef, (snapshot) => {
-          if(snapshot.exists()){
-            this.noscores = false;
-            const data = snapshot.val();
-
-            if (data) {
-              const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
-              dataArray.sort((a, b) => a.value - b.value);
-              this.userScores = {};
-              dataArray.forEach((item) => {
-                const dateStr = item.key;
-                const modifiedDateStr = dateStr.replace(/q/g, '-').replace(/e/g, ' ').replace(/w/g, ':');
-
-                this.userScores[modifiedDateStr] = item.value;
-              });
-            }
-          } 
-          else{
-            this.noscores = true;
-          }       
-          
-        });
-      }
+      onAuthStateChanged(auth, (user) => {
+        this.fetchDataAfterUserSet();
+      });
       
     },
     computed: {
@@ -180,10 +180,39 @@
         return this.timer.toFixed(2);
       },
       user() {
+        // this.created();
         return this.$store.getters.getCurrUser;
       },
     },
     methods: {
+      fetchDataAfterUserSet() {
+        if (this.$store.getters.getCurrUser != null) {
+          const tempUser = this.$store.getters.getCurrUser;
+          const uid = tempUser.uid;
+          const userScoresRef = ref(db, `/users/${uid}/alphabetScores`);
+
+          onValue(userScoresRef, (snapshot) => {
+            if (snapshot.exists()) {
+              this.noscores = false;
+              const data = snapshot.val();
+
+              if (data) {
+                const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
+                dataArray.sort((a, b) => a.value - b.value);
+                this.userScores = {};
+                dataArray.forEach((item) => {
+                  const dateStr = item.key;
+                  const modifiedDateStr = dateStr.replace(/q/g, '-').replace(/e/g, ' ').replace(/w/g, ':');
+
+                  this.userScores[modifiedDateStr] = item.value;
+                });
+              }
+            } else {
+              this.noscores = true;
+            }
+          });
+        }
+      },
       startTimer() {
         this.startTime = new Date();
         this.intervalId = setInterval(() => {
@@ -247,7 +276,7 @@
               console.error('Error adding data:', error);
             });
 
-            const displayPath = `${this.user.displayName}`+','+ `${datepath}` ;
+            const displayPath = `${this.user.uid}`;
             // ',' = remove on load
             const latestPath = `/games/alphabetgame/latestScores/`+displayPath;
 
@@ -259,7 +288,7 @@
             });
 
 
-            const topPath = `/games/alphabetgame/highscores/`+displayPath;
+            const topPath = `/games/alphabetgame/highscores/`+displayPath+":"+datepath;
 
             // Add the timer value under the "highscores" subfolder
             set(ref(db, topPath), time).then(() => {
