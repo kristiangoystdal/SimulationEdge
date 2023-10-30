@@ -1,125 +1,132 @@
 <template>
-  <v-container fluid>
-      <v-layout column>
-          <v-card>
-              <v-card-text>
-                  <v-flex class="mb-4">
-                      <v-avatar size="96" class="mr-4">
-                          <img :src="'/avatars/avatar_' + (form.avatar.toLowerCase()) + '.png'" alt="Avatar">
-                      </v-avatar>
-                      <v-btn @click="openAvatarPicker">Change Avatar</v-btn>
-                  </v-flex>
-                  <v-text-field
-                      v-model="form.firstName"
-                      label="FirstName"></v-text-field>
-                  <v-text-field
-                      v-model="form.lastName"
-                      label="Last Name"></v-text-field>
-                  <v-text-field
-                      v-model="form.contactEmail"
-                      label="Email Address"></v-text-field>
-              </v-card-text>
-              <v-card-actions>
-                  <v-btn color="primary" :loading="loading" @click.native="update">
-                      <v-icon left dark>check</v-icon>
-                      Save Changes
-                  </v-btn>
-              </v-card-actions>
-          </v-card>
-      </v-layout>
-      <avatar-picker
-          v-model="showAvatarPicker"
-          :current-avatar="form.avatar"
-          @selected="selectAvatar"></avatar-picker>
-  </v-container>
-</template>
-  
-  <script>
-  import { mapActions } from 'vuex';
-  import { getAuth, onAuthStateChanged, updateEmail, updateProfile } from '@firebase/auth';
-  
-  export default {
-    ...mapActions(['setUser']),
-    name: 'UserData',
-    data() {
-      return {
-        name: '',
-        email: '',
-        photoUrl: '',
-        editing: false,
-        user: null,
-      };
-    },
-    methods: {
-      ...mapActions(['setUser']),
-      // observeAuthState() {
-      //   const auth = getAuth();
-  
-      //   onAuthStateChanged(auth, (user) => {
-      //     if (user) {
-      //       this.$emit('user', user);
-      //       this.setUser(user);
-  
-      //       this.name = user.displayName;
-      //       this.email = user.email;
-      //       this.photoUrl = user.photoURL;
-      //     } else {
-      //       this.$emit('user', null);
-      //       this.setUser(null);
-      //     }
-      //   });
-      // },
-      toggleEdit() {
-        this.editing = !this.editing;
-      },
-      saveChanges() {
-        const auth = getAuth();
-        updateEmail(auth.currentUser, this.email)
-          .then(() => {
-            this.toggleEdit();
-          })
-          .catch((error) => {
-            alert(error);
-          });
-  
-        updateProfile(auth.currentUser, {
-          displayName: this.name,
-        })
-          .then(() => {
-            console.log('Profile Updated');
-          })
-          .catch((error) => {
-            alert(error);
-          });
-      },
-    },
-    created() {
-      this.observeAuthState();
-    },
-    computed: {
-        user() {
-            return this.$store.getters.getCurrUser;
-        },  
-    },
-  };
-  </script>
-  
-  <style scoped>
+  <div class="user-card">
+    <v-card>
+      <v-card-title>
+        User Information
+      </v-card-title>
+      <v-card-content>
+        <div v-if="!editing">
+          <p><strong>Username:</strong> {{ userData.username }}</p>
+          <p><strong>Email:</strong> {{ userData.email }}</p>
+          <v-button @click="toggleEditing" v-if="!editing">Edit</v-button>
+        </div>
 
-  .border{
-    border: solid;
-  }
-  
-  .center{
-    margin: auto;
-    text-align: center;
-  }
-  @media (min-width: 769px) {
-    /* Add any custom CSS for larger screens if needed */
-  }
-  
-  @media (max-width: 768px) {
-    /* Add any custom CSS for smaller screens if needed */
-  }
-  </style>
-  
+        <div v-else>
+          <v-text-field
+            v-model="editedData.username"
+            clearable
+            label="Username"
+            :placeholder="userData.username"
+            id="editBox"
+          >
+          </v-text-field>
+          <v-text-field
+            v-model="editedData.email"
+            clearable
+            label="E-mail"
+            :placeholder="userData.email"
+            id="editBox"
+          >
+          </v-text-field>
+          
+          <v-button @click="saveChanges">Save</v-button>
+          <v-button @click="toggleEditing">Cancel</v-button>
+        </div>
+      </v-card-content>
+    </v-card>
+  </div>
+</template>
+
+<script>
+import {
+    getAuth,
+    updateProfile,
+    onAuthStateChanged,
+} from "firebase/auth";
+import { getDatabase, ref, onValue, set, remove, get} from 'firebase/database';
+
+const db = getDatabase(); 
+const auth = getAuth();
+
+export default {
+  data() {
+    return {
+      userData: {
+        username: '', // Initialize with user data from Firebase
+        email: '',    // Initialize with user data from Firebase
+      },
+      editedData: {
+        username: '',
+        email: '',
+      },
+      editing: false,
+    };
+  },
+  created(){
+    onAuthStateChanged(auth, (user) => {
+        this.userData.username = user.displayName;
+        this.userData.email = user.email;
+    });
+  },
+  methods: {
+    toggleEditing() {
+      this.editing = !this.editing;
+      if (this.editing) {
+        this.editedData.username = "";
+        this.editedData.email = "";
+      }
+    },
+    saveChanges() {
+      const usernameRef = ref(db, `/username`);
+      onValue(usernameRef, (snapshot) => {
+        if (snapshot.exists() && snapshot.hasChild(this.editedData.username)) {
+          // The username is already taken; handle this case accordingly
+          alert('Username is already taken. Please choose another.');
+        } else {
+          const userId = auth.currentUser.uid;
+          
+          // Update the user's profile first
+          updateProfile(auth.currentUser, {
+            displayName: this.editedData.username,
+            photoURL: ""
+          })
+            .then(() => {
+              // Remove the old reference (if it exists)
+              if (this.userData.username) {
+                remove(ref(db, `/username/${this.userData.username}`));
+              }
+              
+              // Set the new reference
+              set(ref(db, `/username/${this.editedData.username}`), userId);
+
+              this.toggleEditing();
+
+
+              this.userData.username = auth.currentUser.displayName;
+              this.userData.email = auth.currentUser.email;
+
+            })
+            .catch((error) => {
+              alert(error);
+            });
+        }
+      });
+    }
+
+
+  },
+};
+</script>
+
+<style scoped>
+.user-card {
+  margin: 1vw auto;
+  padding: 10px;
+  max-width: 600px;
+  color: red;
+}
+#editBox{
+  width: 100px;
+  margin: auto;
+}
+</style>
