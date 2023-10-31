@@ -151,7 +151,7 @@
 
                             // Add the username-userID pair to the database
                             const userId = user.uid;
-                            set(ref(db, `/username/${username}`), userId);
+                            set(ref(db, `/username/${userId}`), username);
                         })
                         .catch((error) => {
                             // Handle registration error

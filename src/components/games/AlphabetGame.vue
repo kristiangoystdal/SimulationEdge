@@ -119,8 +119,8 @@
           const dataArray = Object.entries(userData).map(([key, value]) => ({ key, value }));
           this.username = {};
           dataArray.forEach((item) => {
-            this.username[item.value] = item.key;
-            console.log(item.key + ":" + item.value)
+            this.username[item.key] = item.value;
+            // console.log(item.key + ":" + item.value)
           });
         }
         else {
@@ -144,6 +144,7 @@
             // console.log("Key: " + key)
             const value = item.value;
             const displayNameKey = this.username[key];
+            // console.log("Display Name: " + displayNameKey)
 
             this.topScores[index] = [displayNameKey, value];
             index = index + 1;
@@ -161,7 +162,7 @@
           this.latestScores = {};
           dataArray.forEach((item) => {
             const keyParts = item.key.split(',');
-            const key = keyParts[0];            
+            const key = keyParts[0];    
             const displayNameKey = this.username[key];
 
             const value = item.value;
@@ -180,7 +181,6 @@
         return this.timer.toFixed(2);
       },
       user() {
-        // this.created();
         return this.$store.getters.getCurrUser;
       },
     },
