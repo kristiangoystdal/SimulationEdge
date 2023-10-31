@@ -77,53 +77,62 @@ export default {
       }
     },
 
-    // doesnt work... just deleteds everything in database
-    
-    // saveChanges() {
-    //   const usernameRef = ref(db, `/username`);
+    // Define the function to update the username
+    saveChanges() {
+      // Reference to the Firebase Realtime Database
+      const db = getDatabase();
+      const usernameRef = ref(db, `/username`);
+      
+      // New username and user ID
+      const newUsername = this.editedData.username;
+      const userId = auth.currentUser.uid;
 
-    //   // Check if the new username is already taken
-    //   const newUsername = this.editedData.username;
-    //   const userId = auth.currentUser.uid;
+      // Check if the new username is already taken
+      get(usernameRef)
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            const usernameData = snapshot.val();
 
-    //   get(usernameRef)
-    //     .then((snapshot) => {
-    //       if (snapshot.exists() && snapshot.val()[newUsername]) {
-    //         // The username is already taken; handle this case accordingly
-    //         alert('Username is already taken. Please choose another.');
-    //       } else {
-    //         // Update the user's profile first
-    //         updateProfile(auth.currentUser, {
-    //           displayName: newUsername,
-    //           photoURL: ""
-    //         })
-    //           .then(() => {
-    //             // Remove the old reference (if it exists)
-    //             if (this.userData.username) {
-    //               remove(ref(db, `/username/${this.userData.username}`));
-    //             }
+            // Check if the new username already exists
+            if (Object.values(usernameData).includes(newUsername)) {
+              alert('Username is already taken. Please choose another.');
+            } else {
+              // Update the user's profile first
+              updateProfile(auth.currentUser, {
+                displayName: newUsername,
+                photoURL: ""
+              })
+                .then(() => {
+                  // Remove the old reference (if it exists)
+                  if (this.userData.username) {
+                    remove(ref(db, `/username/${this.userData.username}`));
+                  }
 
-    //             // Set the new reference
-    //             set(ref(db, `/username/${newUsername}`), userId)
-    //               .then(() => {
-    //                 // Update the user data
-    //                 this.userData.username = newUsername;
-    //                 this.userData.email = auth.currentUser.email;
-    //                 this.toggleEditing();
-    //               })
-    //               .catch((error) => {
-    //                 alert(error);
-    //               });
-    //           })
-    //           .catch((error) => {
-    //             alert(error);
-    //           });
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       alert(error);
-    //     });
-    // }
+                  // Set the new reference with user ID as the key
+                  set(ref(db, `/username/${userId}`), newUsername)
+                    .then(() => {
+                      // Update the user data
+                      this.userData.username = newUsername;
+                      this.userData.email = auth.currentUser.email;
+                      this.toggleEditing();
+                    })
+                    .catch((error) => {
+                      alert(error);
+                    });
+                })
+                .catch((error) => {
+                  alert(error);
+                });
+            }
+          } else {
+            alert('Error in checking username availability.');
+          }
+        })
+        .catch((error) => {
+          alert(error);
+        });
+    }
+
 
 
 
