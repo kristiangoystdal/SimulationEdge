@@ -1,39 +1,86 @@
 <template>
   <div class="user-card">
-    <v-card>
       <v-card-title>
-        User Information
+        Account
       </v-card-title>
-      <v-card-content>
-        <div v-if="!editing">
-          <p><strong>Username:</strong> {{ userData.username }}</p>
-          <p><strong>Email:</strong> {{ userData.email }}</p>
-          <v-button @click="toggleEditing" v-if="!editing">Edit</v-button>
+      <v-card-content >
+        <div v-if="!editing" id="databox">
+          <div id="label">
+            <p><strong>Username:</strong> {{ userData.username }}</p>
+          </div>
+          <div id="label">
+            <p><strong >Email:</strong> {{ userData.email }}</p>
+          </div>
+        
+          <br>
+          <v-btn
+            block
+            color=""
+            size="large"
+            type="submit"
+            variant="elevated"
+            @click="toggleEditing"
+            >
+            Edit User
+          </v-btn>
         </div>
 
-        <div v-else>
+        <v-form
+          v-model="form"
+          @submit.prevent="onSubmit"
+          v-else
+          id="databox"
+        >
+          <!-- Username Input Field -->
           <v-text-field
-            v-model="editedData.username"
-            clearable
-            label="Username"
-            :placeholder="userData.username"
-            id="editBox"
+          v-model="editedData.username"
+          :readonly="loading"
+          :rules="editedData.username ? [rules.noSpaces]: []"
+          clearable
+          label="Username"
+          :placeholder="userData.username"
           >
           </v-text-field>
+
+          <!-- E-mail Input field -->
           <v-text-field
-            v-model="editedData.email"
-            clearable
-            label="E-mail"
-            :placeholder="userData.email"
-            id="editBox"
+          v-model="editedData.email"
+          :rules="editedData.email ? [rules.email] : []"
+          class="mb-2"
+          clearable
+          label="Email"
+          :placeholder="userData.email"
+          ></v-text-field>
+
+
+          <br>
+
+          <v-btn
+            :disabled="!form || editedData.email !=='' || editedData.username ==''"
+            :loading="loading"
+            block
+            color="success"
+            size="large"
+            type="submit"
+            variant="elevated"
+            @click="saveChanges"
           >
-          </v-text-field>
-          
-          <v-button @click="saveChanges">Save</v-button>
-          <v-button @click="toggleEditing">Cancel</v-button>
-        </div>
+            Save Changes
+          </v-btn>
+          <br>
+          <v-btn
+            block
+            color=""
+            size="large"
+            type="submit"
+            variant="elevated"
+            @click="toggleEditing"
+          >
+            Cancel
+          </v-btn>
+        </v-form>
+        <br>
       </v-card-content>
-    </v-card>
   </div>
 </template>
 
@@ -60,6 +107,22 @@ export default {
         email: '',
       },
       editing: false,
+      loading: false,
+      form: false,
+      rules:{
+        noSpaces: (value) => {
+          if (/\s/.test(value)) {
+            return "Username cannot contain spaces";
+          }
+          return true;
+        },
+        required: value => !!value || 'Field is required',
+        min: value => value.length >= 8 || 'Password must be min 8 characters',
+        digit: value => (/\d/.test(value)) || 'Password must include a number',
+        capital: value => (/[A-Z]/.test(value)) || 'Password must include a capital letter',
+        email: value => (/.+@.+\..+/.test(value)) || 'Email must be valid',
+        passwordmatch: value => value==this.password1 || "Password doesn't match",
+      },
     };
   },
   created(){
@@ -79,6 +142,10 @@ export default {
 
     // Define the function to update the username
     saveChanges() {
+
+      this.loading = true;
+
+      setTimeout(() => (this.loading = false), 2000);
       // Reference to the Firebase Realtime Database
       const db = getDatabase();
       const usernameRef = ref(db, `/username`);
@@ -141,14 +208,42 @@ export default {
 </script>
 
 <style scoped>
+
 .user-card {
   margin: 1vw auto;
   padding: 10px;
   max-width: 600px;
-  color: red;
+  border: solid;
+  background-color: bisque;
+  border-radius: 20px;
 }
 #editBox{
   width: 100px;
+  height: 10px;
   margin: auto;
 }
+#databox{
+  width: 90%;
+  margin: auto;
+}
+.flex{
+  display: flex;
+}
+#button{
+  border: solid;
+  font-size: auto;
+  height: auto;
+  width: 20%;
+  margin: 0.5vw 0.5vw;
+  padding: 0.5vw;
+  background-color:white;
+  border-radius: 15px;
+  text-align: center;
+  font-family: 'TitleFont';
+  cursor: pointer;
+}
+/* v-button{
+  width: 100%;
+  height: 100%;
+} */
 </style>
