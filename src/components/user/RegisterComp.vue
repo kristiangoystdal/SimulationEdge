@@ -12,7 +12,7 @@
             <v-text-field
             v-model="username"
             :readonly="loading"
-            :rules="[rules.required]"
+            :rules="[rules.required, rules.noSpaces]"
             clearable
             label="Username"
             placeholder="Enter your username"
@@ -33,7 +33,7 @@
             <v-text-field
             v-model="password1"
             :readonly="loading"
-            :rules="[rules.required, rules.min, rules.digit, rules.capital]"
+            :rules="[rules.required, rules.min, rules.digit, rules.capital, rules.noSpacePassword]"
             clearable
             label="Password"
             placeholder="Enter your password"
@@ -181,6 +181,18 @@
                     capital: value => (/[A-Z]/.test(value)) || 'Password must include a capital letter',
                     email: value => (/.+@.+\..+/.test(value)) || 'Email must be valid',
                     passwordmatch: value => value==this.password1 || "Password doesn't match",
+                    noSpaces: (value) => {
+                        if (/\s/.test(value)) {
+                            return "Username cannot contain spaces";
+                        }
+                        return true;
+                    },
+                    noSpaces: (value) => {
+                        if (/\s/.test(value)) {
+                            return "Password cannot contain spaces";
+                        }
+                        return true;
+                    },
                 },
             }
         },
