@@ -7,42 +7,43 @@
                 <v-sheet >
                 <v-img :src="slide.image" :aspect-ratio="16/9" cover>
                     <div class="text-h2" @click.stop="playVideo(i)">
-                    {{ !videoPlaying ? slide.name : '' }}
-                    <v-icon v-if="!videoPlaying" class="play-button" @click.stop="playVideo(i)">mdi-play-circle-outline</v-icon>
+                      {{ !videoPlaying ? slide.name : '' }}
+                      <v-icon v-if="!videoPlaying" class="play-button" @click.stop="playVideo(i)">mdi-play-circle-outline</v-icon>
                     </div>
                 </v-img>
                 </v-sheet>
             </v-carousel-item>
         </v-carousel>
     </div>
-    
     <div id="gallery" v-if="videoPlaying">
-      <video controls autoplay ref="videoPlayer" class="video-player" @click.stop="toggleVideo">
+      <video controls autoplay loop ref="videoPlayer" class="video-player" @click.stop="toggleVideo">
         <source :src="currentVideo" type="video/mp4">
         Your browser does not support the video tag.
       </video>
     </div>
+
+    <br><br><br>
   </template>
   
   <script>
   import TitleVue from '../extra/Title.vue';
   
-  import LofotenImage from '../../assets/photos/Lofoten.png';
-  import LofotenVideo from '../../assets/videos/Lofoten.mp4';
+  // import LofotenImage from '../../assets/photos/Lofoten.png';
+  // import LofotenVideo from '../../assets/videos/Lofoten.mp4';
   import AreImage from '../../assets/photos/Åre.png';
   import AreVideo from '../../assets/videos/Åre.mp4';
   import TrehytteImage from '../../assets/photos/Trehytte.png';
   import TrehytteVideo from '../../assets/videos/Trehytte.mp4';
-  import USAImage from '../../assets/photos/USA Roadtrip.png';
-  import USAVideo from '../../assets/videos/USA.mp4';
+  // import USAImage from '../../assets/photos/USA Roadtrip.png';
+  // import USAVideo from '../../assets/videos/USA.mp4';
   
   export default {
     name: 'VideoGallery',
     data() {
       const slideData = [
-        { name: 'Lofoten', image: LofotenImage, video: LofotenVideo },
+        // { name: 'Lofoten', image: LofotenImage, video: LofotenVideo },
         { name: 'Åre', image: AreImage, video: AreVideo },
-        { name: 'Roadtrip i USA', image: USAImage, video: USAVideo },
+        // { name: 'Roadtrip i USA', image: USAImage, video: USAVideo },
         { name: 'Trehyttetur', image: TrehytteImage, video: TrehytteVideo },
       ];
   
@@ -103,7 +104,7 @@
   }
   
   #gallery {
-    max-width: 1000px;
+    max-width: 900px;
     width: 90%;
     height: auto;
     border: solid;
