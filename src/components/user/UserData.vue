@@ -56,7 +56,7 @@
           <br>
 
           <v-btn
-            :disabled="!form || editedData.email !=='' || editedData.username ==''"
+            :disabled="!form || (editedData.email === '' && editedData.username === '')"      
             :loading="loading"
             block
             color="success"
@@ -151,7 +151,11 @@ export default {
       const usernameRef = ref(db, `/username`);
       
       // New username and user ID
-      const newUsername = this.editedData.username;
+      var newUsername = this.editedData.username;
+      if (!this.editedData.username) {
+        newUsername = this.userData.username;
+        console.log(newUsername);
+      }
       const userId = auth.currentUser.uid;
 
       // Check if the new username is already taken
