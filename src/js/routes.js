@@ -10,6 +10,8 @@ import Account from '../pages/main/Account.vue';
 import Videos from '../pages/main/Videos.vue';
 import GamingCentral from '../pages/games/GamingCentral.vue';
 import AlphabetGame from '../pages/games/AlphabetGame.vue';
+import SimonSays from '../pages/games/SimonSays.vue';
+import FlappyBird from '../pages/games/FlappyBird.vue';
 
 // Define routes
 const routes = [
@@ -21,6 +23,8 @@ const routes = [
   { path: '/account', name: "account", component: Account, meta: { requiresAuth: true },},
   { path: '/games/gaming-central', name: "gaming-central", component: GamingCentral },
   { path: '/games/the-alphabet-game', name: "the-alphabet-game", component: AlphabetGame },
+  { path: '/games/simon-says', name: "simon-says", component: SimonSays },
+  { path: '/games/flappy-bird', name: "flappy-bird", component: FlappyBird },
   // { path: '/formulacentral', name: "formula-central", component: FormulaCentral },
 ];
 
