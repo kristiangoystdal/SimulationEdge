@@ -19,9 +19,15 @@
             </router-link>
           </div>
           <div class="gridItem">
-            <router-link to="/under-development" class="game-item">
+            <router-link to="/games" class="game-item">
               <img src="../../assets/photos/coming_soon.png" alt="Game" class="round-image">
-              <span class="under-text">Coming Soon</span>
+              <span class="under-text">Simon Says</span>
+            </router-link>
+          </div>
+          <div class="gridItem">
+            <router-link to="/games" class="game-item">
+              <img src="../../assets/photos/coming_soon.png" alt="Game" class="round-image">
+              <span class="under-text">Flappy Bird</span>
             </router-link>
           </div>
         </div>
