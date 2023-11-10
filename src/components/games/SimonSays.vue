@@ -22,10 +22,27 @@
     </div>
 
 
+    <HighscoreComp 
+        :scoreTitle='scoreTitle' 
+        :userScoresPath="userPath"
+        :databasePath="dbPath" 
+        :resetFunction="reset" 
+        :score="sequenceLength"
+        :scoreLabel="label"
+        :sortWay="hightoLow"
+    >
+    </HighscoreComp> 
+
 </template>
 
 <script>
 import TitleVue from '../extra/Title.vue';
+import HighscoreComp from './HighscoreComp.vue';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getDatabase, ref, onValue, set, remove } from 'firebase/database';
+
+const db = getDatabase();
+const auth = getAuth();
 
 export default {
     name: 'SimonSays',
@@ -40,16 +57,22 @@ export default {
             ],
             currentIndex: 0,
             currentScore: 0,
-            sequenceLength: 2,
+            sequenceLength: 1,
             currentlyBlinking: true,
             currentlyPlaying: false,
             sequence: [],
             sequenceIndex: 0,
             gameover: false,
+            dbPath: "simonsays",
+            userPath: "simonsaysScores",
+            scoreTitle: "Score",
+            label: "",
+            hightoLow: false,
         };
     },
     components: {
-        TitleVue
+        TitleVue,
+        HighscoreComp,
     },
     computed:{
         blinkDuration() {
@@ -57,27 +80,30 @@ export default {
                 return 500
             }
             else{
+                console.log("Calc");
                 return 1000-(25*(this.sequenceLength-1));
             }
-        }    
+        },
+        user() {
+            return this.$store.getters.getCurrUser;
+        },  
     },
     methods: {
         async blinkLights() {
+            console.log(this.blinkDuration);
             this.currentlyBlinking= true;
             this.currentlyPlaying=true;
-            this.sequence = [];
-            this.sequenceIndex=0;
-            for (let i = 0; i < this.sequenceLength; i++) {
-                // Generate a random index to change the light color
-                const randomIndex = Math.floor(Math.random() * this.lights.length);
-
+            this.sequenceIndex=0;   
+            // Generate a random index to change the light color
+            const randomIndex = Math.floor(Math.random() * this.lights.length);
+            this.sequence.push(randomIndex);
+            for (let i = 0; i < this.sequence.length; i++) {
                 // Change the color of the selected light to yellow
-                this.lights[randomIndex].color = 'green';
+                this.lights[this.sequence[i]].color = 'green';
 
                 // Add a delay before turning the light back to white
                 await new Promise(resolve => setTimeout(() => {
-                    this.lights[randomIndex].color = 'white';
-                    this.sequence.push(randomIndex);
+                    this.lights[this.sequence[i]].color = 'white';
                     resolve();
                 }, this.blinkDuration));
 
@@ -102,7 +128,79 @@ export default {
                 this.gameover=true;
                 this.lights[index].color = 'red';
                 console.log("Game Over...");
+                this.GameOver();
             }
+        },
+        GameOver(){
+            if (this.user) {
+                const uid = this.user.uid;
+                const date = new Date();
+                const datepath = date.getDate()+'q'+date.getMonth()+'q'+date.getFullYear()+'e'+date.getHours()+'w'+date.getMinutes()+'w'+date.getSeconds(); 
+                // q = '-'
+                // e = ' '
+                // w = ':'
+
+                const score = this.sequenceLength
+                console.log(score)
+                const path = `/users/${uid}/simonsaysScores/${datepath}`;
+
+                // Add the timer value under the "alphabetScores" subfolder
+                set(ref(db, path), score).then(() => {
+                // Data added successfully
+                console.log("Added to user");
+                }).catch((error) => {
+                console.error('Error adding data:', error);
+                });
+
+                const displayPath = `${this.user.uid}`;
+                // ',' = remove on load
+                const latestPath = `/games/simonsays/latestScores/`+displayPath;
+
+                // Add the timer value under the "latestScores" subfolder
+                set(ref(db, latestPath), score).then(() => {
+                // Data added successfully
+                }).catch((error) => {
+                console.error('Error adding data:', error);
+                });
+
+
+                const topPath = `/games/simonsays/highscores/`+displayPath+":"+datepath;
+
+                // Add the timer value under the "highscores" subfolder
+                set(ref(db, topPath), score).then(() => {
+                // Data added successfully
+                this.updateTopScores();
+                }).catch((error) => {
+                console.error('Error adding data:', error);
+                });
+            }
+            else{
+                console.log("No user logged in");
+            }
+        },
+        updateTopScores (){
+            const highScoresRef = ref(db, '/games/simonsays/highscores');
+            const maxCount = 50;
+
+            onValue(highScoresRef, (snapshot) => {
+            const data = snapshot.val();
+
+            if (data) {
+                const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
+
+                // Sort the array in ascending order (lowest to highest)
+                dataArray.sort((a, b) => a.value.score - b.value.score);
+
+                if (dataArray.length > maxCount) {
+                const itemsToRemove = dataArray.slice(maxCount);
+                
+                itemsToRemove.forEach((item) => {
+                    const key = item.key;
+                    remove(ref(db, `/games/simonsays/highscores/${key}`));
+                });
+                }
+            }
+            });  
         },
         reset(){
             this.lights=[
