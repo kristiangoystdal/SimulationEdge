@@ -18,73 +18,24 @@
     
   </v-container>
 
-  <div id="other">
-    <div id="otherbox">
-      <div id="user">
-        <div id="timer">Time: {{ formattedTimer }} seconds</div>
-        <div id="done-text" v-if="done">{{ doneText }}</div>
-        <v-btn id="reset-button" @click="reset">
-          Reset
-        </v-btn>
-        
-        <div id="userList" v-if="user">
-          <div id="userTitle">Personal Best</div>
-          <div id="list" v-if="!noscores">
-            <ul>
-              <li v-for="(value, key) in userScores" :key="key">
-                  {{ value }} - {{ key }}
-              </li>
-            </ul>
-          </div>
-          <div v-else>
-            You have no scores yet...
-          </div>
-        </div>
-
-        <div v-else>
-          Sign in to save scores
-        </div>
-        
-      </div>
-    </div>
-    
-    <div id="otherbox">
-      <div id="highscoreBoard">
-        <div id="highscoreTitle">Highscores</div>
-        <div id="type">
-          <div id="topList">
-            <div id="topTitle">Top</div>
-            <div id="list">
-              <ul>
-                <li v-for="(item, key) in topScores" :key="key">
-                  {{ item[1] }} - {{ item[0] }}
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div id="latestList">
-            <div id="latestTitle">Latest</div>
-            <div id="list">
-              <ul>
-                <li v-for="(value, key) in latestScores" :key="key">
-                  {{ value }} - {{ key }}
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-    
+  <HighscoreComp 
+    :scoreTitle='scoreTitle' 
+    :userScoresPath="userPath"
+    :databasePath="dbPath" 
+    :resetFunction="reset" 
+    :score="formattedTimer"
+    :scoreLabel="label"
+    :sortWay="highToLow"
+  >
+  </HighscoreComp>    
 </template>
   
 <script>
   import TitleVue from '../extra/Title.vue';
+  import HighscoreComp from './HighscoreComp.vue';
   import { getAuth, onAuthStateChanged } from "firebase/auth";
-  import { getDatabase, ref, onValue, set, remove} from 'firebase/database';
-  
+  import { getDatabase, ref, onValue, set, remove } from 'firebase/database';
+
   const db = getDatabase();
   const auth = getAuth();
 
@@ -97,122 +48,28 @@
         startTime: null,
         timer: 0,
         intervalId: null,
-        doneText: "Congratulations! You did it!",
         done: false,
-        win: null,
         pageTitle: "The Alphabet Game",
-        topScores: [],
-        latestScores: {}, 
-        userScores: {},
-        noscores: false,
-        username: {},
+        dbPath: "alphabetgame",
+        userPath: "alphabetScores",
+        scoreTitle: "Time",
+        label: "seconds",
+        highToLow: true,
       };
     },
     components: {
       TitleVue,
-    },
-    created() {
-      const userIDRef = ref(db, `/username`); // Add userId to the reference path
-      onValue(userIDRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
-          const dataArray = Object.entries(userData).map(([key, value]) => ({ key, value }));
-          this.username = {};
-          dataArray.forEach((item) => {
-            this.username[item.key] = item.value;
-            // console.log(item.key + ":" + item.value)
-          });
-        }
-        else {
-          console.log("User data not found");
-          displayNameKey = "No username";
-        }
-      });
-
-      const topScoresRef = ref(db, '/games/alphabetgame/highscores');
-
-      onValue(topScoresRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
-          dataArray.sort((a, b) => a.value - b.value);
-          this.topScores = {};
-          var index = 0;
-          dataArray.forEach((item) => {
-            const keyParts = item.key.split(':');
-            const key = keyParts[0];
-            // console.log("Key: " + key)
-            const value = item.value;
-            const displayNameKey = this.username[key];
-            // console.log("Display Name: " + displayNameKey)
-
-            this.topScores[index] = [displayNameKey, value];
-            index = index + 1;
-          });
-
-        }
-      });
-
-      const latestScoresRef = ref(db, '/games/alphabetgame/latestScores');
-
-      onValue(latestScoresRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
-          this.latestScores = {};
-          dataArray.forEach((item) => {
-            const keyParts = item.key.split(',');
-            const key = keyParts[0];    
-            const displayNameKey = this.username[key];
-
-            const value = item.value;
-            this.latestScores[displayNameKey] = value;
-          });
-        }
-      });
-
-      onAuthStateChanged(auth, (user) => {
-        this.fetchDataAfterUserSet();
-      });
-      
+      HighscoreComp,
     },
     computed: {
       formattedTimer() {
-        return this.timer.toFixed(2);
+        return parseFloat(this.timer.toFixed(2));
       },
       user() {
         return this.$store.getters.getCurrUser;
       },
     },
     methods: {
-      fetchDataAfterUserSet() {
-        if (this.$store.getters.getCurrUser != null) {
-          const tempUser = this.$store.getters.getCurrUser;
-          const uid = tempUser.uid;
-          const userScoresRef = ref(db, `/users/${uid}/alphabetScores`);
-
-          onValue(userScoresRef, (snapshot) => {
-            if (snapshot.exists()) {
-              this.noscores = false;
-              const data = snapshot.val();
-
-              if (data) {
-                const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
-                dataArray.sort((a, b) => a.value - b.value);
-                this.userScores = {};
-                dataArray.forEach((item) => {
-                  const dateStr = item.key;
-                  const modifiedDateStr = dateStr.replace(/q/g, '-').replace(/e/g, ' ').replace(/w/g, ':');
-
-                  this.userScores[modifiedDateStr] = item.value;
-                });
-              }
-            } else {
-              this.noscores = true;
-            }
-          });
-        }
-      },
       startTimer() {
         this.startTime = new Date();
         this.intervalId = setInterval(() => {
@@ -232,18 +89,16 @@
             this.currentIndex--;
             this.input = this.input.replace(/.$/, '');
           }
-        } 
-        else if (event.key === 'Escape') {
+        } else if (event.key === 'Escape') {
           this.reset();
-        } 
-        else if (this.currentIndex < this.alphabet.length) {
+        } else if (this.currentIndex < this.alphabet.length) {
           if (event.key.toLowerCase() === 'a' && this.currentIndex === 0) {
             this.startTimer();
           }
 
           this.input += event.key;
           this.currentIndex++;
-          this.checkWin()
+          this.checkWin();
         }
       },
       checkWin() {
@@ -297,7 +152,6 @@
             }).catch((error) => {
               console.error('Error adding data:', error);
             });
-
           }
         }
       },
@@ -323,24 +177,20 @@
               });
             }
           }
-        });
-        
+        });  
       },
-      insertRandomValues(){
-        for(var i = 0; i<20; i++){
-          console.log(i)
+      insertRandomValues() {
+        for (let i = 0; i < 20; i++) {
           const randomFloat = Math.random();
           const path = randomFloat.toString().replace(/\./g, '');
-          const topPath = `/games/alphabetgame/highscores/`+ path;
+          const topPath = `/games/alphabetgame/highscores/` + path;
 
-          // Add the timer value under the "highscores" subfolder
           set(ref(db, topPath), randomFloat).then(() => {
             // Data added successfully
           }).catch((error) => {
             console.error('Error adding data:', error);
           });
         }
-        
       },
       reset() {
         this.input = "";
@@ -359,6 +209,7 @@
     },
   };
 </script>
+
 
 
 <style scoped>
