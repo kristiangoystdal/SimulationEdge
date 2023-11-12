@@ -17,6 +17,17 @@
     </div>
     
   </v-container>
+  <div id="mobileBox">
+      <input 
+      id="inputField" 
+      type="text"
+      v-model="mobileInput"
+      @keydown="handleKeyDown"
+      >
+  </div>
+  <div>
+    {{ consoleLog }}
+  </div>
 
   <HighscoreComp 
     :scoreTitle='scoreTitle' 
@@ -26,6 +37,9 @@
     :score="formattedTimer"
     :scoreLabel="label"
     :sortWay="highToLow"
+    :buttonDisable="resetButtonState"
+    :buttonText="resetButtonText"
+    :buttonFunction="reset"
   >
   </HighscoreComp>    
 </template>
@@ -55,6 +69,10 @@
         scoreTitle: "Time",
         label: "seconds",
         highToLow: true,
+        resetButtonState:true,
+        resetButtonText: "Reset",
+        mobileInput: '',
+        consoleLog: '',
       };
     },
     components: {
@@ -68,6 +86,7 @@
       user() {
         return this.$store.getters.getCurrUser;
       },
+
     },
     methods: {
       startTimer() {
@@ -84,6 +103,7 @@
         clearInterval(this.intervalId);
       },
       handleKeyDown(event) {
+        this.consoleLog= event.key;
         if (event.key === 'Backspace') {
           if (this.currentIndex > 0) {
             this.currentIndex--;
@@ -101,8 +121,30 @@
           this.checkWin();
         }
       },
+      handleKeyDownMobile(){
+        // if (event.key === 'Backspace') {
+        //   if (this.currentIndex > 0) {
+        //     this.currentIndex--;
+        //     this.input = this.input.replace(/.$/, '');
+        //   }
+        // } else if (event.key === 'Escape') {
+        //   this.reset();
+        // } 
+        if (this.currentIndex < this.alphabet.length) {
+          this.consoleLog = this.mobileInput;
+          if (mobileInput.toLowerCase() === 'a' && this.currentIndex === 0) {
+            this.startTimer();
+          }
+
+          this.input += mobileInput;
+          this.currentIndex++;
+          this.checkWin();
+          this.mobileInput = '';
+        }
+      },
       checkWin() {
         let win = true;
+        // console.log(this.input + " vs " + this.alphabet)
         for (let i = 0; i < this.alphabet.length; i++) {
           if (this.input[i] !== this.alphabet[i]) {
             win = false;
@@ -116,7 +158,28 @@
           if (this.user) {
             const uid = this.user.uid;
             const date = new Date();
-            const datepath = date.getDate()+'q'+date.getMonth()+'q'+date.getFullYear()+'e'+date.getHours()+'w'+date.getMinutes()+'w'+date.getSeconds(); 
+            var datepath = date.getDate()+'q'+date.getMonth()+'q'+date.getFullYear()+'e';
+            
+            if(date.getHours()<10){
+              datepath+="0"+date.getHours();
+            }
+            else{
+              datepath+=date.getHours();
+            }
+            datepath+="w";
+            if(date.getMinutes()<10){
+              datepath+="0"+date.getMinutes();
+            }
+            else{
+              datepath+=date.getMinutes();
+            }
+            datepath+="w";
+            if(date.getSeconds()<10){
+              datepath+="0"+date.getSeconds();
+            }
+            else{
+              datepath+=date.getSeconds();
+            }
             // q = '-'
             // e = ' '
             // w = ':'
@@ -145,6 +208,15 @@
 
             const topPath = `/games/alphabetgame/highscores/`+displayPath+":"+datepath;
 
+
+            // Add the timer value under the "highscores" subfolder
+            set(ref(db, topPath), time).then(() => {
+              // Data added successfully
+              this.updateTopScores();
+            }).catch((error) => {
+              console.error('Error adding data:', error);
+            });
+              
             // Add the timer value under the "highscores" subfolder
             set(ref(db, topPath), time).then(() => {
               // Data added successfully
@@ -384,94 +456,33 @@
     }
 
 
-    /* @media (min-width: 769px) {
-        #game {
-            justify-content: center;
-            text-align: center;
-            margin: 4vw auto;
-        }
-        
-        #alphabet {
-            display: inline-block;
-            margin: 3vw auto;
-            border-radius: 2vw;
-            padding: 1vw;
-            background-color: purple;
-            width: 90%;
-            height: auto;
-        }
-        
-        #alphabet span{
-            font-size: 4vw;
-            padding: 0.7%;
-        }
-        
-        #input-letter{
-            font-size: 5vw;
-            margin-bottom: 2vw;
-            width: 5%;
-            text-align: center;
-        }
-
-        #timer{
-            margin: 1vw;
-            font-size: 3vw;
-        }
-
-        #reset-button{
-            width: 10vw;
-            height: auto;
-            padding: 2vw;
-            font-size: 2vw;
-            margin: 5vw auto;
-            background-color: white;
-            border-radius: 2vw;
-            border: solid;
+    @media (min-width: 769px) {
+        #mobileBox{
+          display: none;
         }
     }
 
     @media (max-width: 768px) {
-        #game {
-            justify-content: center;
-            text-align: center;
-            margin: 10vw auto;
+        #mobileBox{
+          max-width: 1200px;
+          width: 90%;
+          height: 50px;
+          border: solid;
+          margin: auto;
+          display: flex;
+          margin: 2vw auto;
+          justify-content: center;
+          background-color:bisque;
+          border-radius: 20px;
         }
-        
-        #alphabet {
-            display: inline-block;
-            margin: 5vw auto;
-            border-radius: 2vw;
-            padding: 1vw;
-            background-color: purple;
-            width: 90%;
-        }
-        
-        #alphabet span{
-            font-size: auto;
-            padding: 0.5%;
-        }
-        
-        #input-letter, #current-letter {
-            font-size: 10vw;
-            margin-bottom: 2vw;
-            width: 10%;
-            text-align: center;
-        }
-
-        #timer{
-            margin: 1vw;
-            font-size: 5vw;
-        }
-
         #reset-button{
-            width: 20vw;
-            height: auto;
-            padding: 2vw;
-            font-size: auto;
-            margin: 5vw auto;
-            background-color: white;
-            border-radius: 2vw;
-            border: solid;
+          width: 20%;
+          text-align: center;
+          padding: 3vw;
+          height: 50px;
+          background-color: white;
+          border-radius: 2vw;
+          border: solid;
         }
-    } */
+    }
 </style>
