@@ -6,28 +6,22 @@
             v-for="(light, index) in lights"
             :key="index"
             :id="'light-' + (index + 1)"
-            :style="{ backgroundColor: light.color }"
-            :disabled="currentlyBlinking || gameover "
+            :style="getLightStyle(light,index)"
             @click="buttonPress(index)"
-            class="light"
+            :class="{'disabledLight': currentlyBlinking || gameover,'light' : !currentlyBlinking && !gameover }"
         >
             {{ index + 1 }}
         </v-btn>
     </div>
-    <br>
-    <v-btn v-if="!currentlyPlaying" @click="blinkLights">Start Round {{ sequenceLength }}</v-btn>
-    <v-btn v-if="gameover" @click="reset">Restart</v-btn>
-    <div v-if="gameover" id="gameover-text">
-        Game Over
-    </div>
-
 
     <HighscoreComp 
         :scoreTitle='scoreTitle' 
         :userScoresPath="userPath"
         :databasePath="dbPath" 
-        :resetFunction="reset" 
-        :score="sequenceLength"
+        :buttonFunction="blinkLights" 
+        :buttonText="startText"
+        :buttonDisable="!currentlyPlaying || gameover"
+        :score="sequenceLength-1"
         :scoreLabel="label"
         :sortWay="hightoLow"
     >
@@ -50,10 +44,10 @@ export default {
         return {
             pageTitle: "Simon Says",
             lights: [
-                { color: 'white' },
-                { color: 'white' },
-                { color: 'white' },
-                { color: 'white' }
+                { color: 'rgb(189, 189, 218)' },
+                { color: 'rgb(189, 189, 218)' },
+                { color: 'rgb(189, 189, 218)' },
+                { color: 'rgb(189, 189, 218)' }
             ],
             currentIndex: 0,
             currentScore: 0,
@@ -87,48 +81,63 @@ export default {
         user() {
             return this.$store.getters.getCurrUser;
         },  
+        startText(){
+            if(this.gameover){
+                return "Start New Round"
+            }
+            else{
+                return "Start Round " + this.sequenceLength.toString()
+            }
+        },
     },
     methods: {
         async blinkLights() {
-            console.log(this.blinkDuration);
-            this.currentlyBlinking= true;
-            this.currentlyPlaying=true;
-            this.sequenceIndex=0;   
-            // Generate a random index to change the light color
-            const randomIndex = Math.floor(Math.random() * this.lights.length);
-            this.sequence.push(randomIndex);
-            for (let i = 0; i < this.sequence.length; i++) {
-                // Change the color of the selected light to yellow
-                this.lights[this.sequence[i]].color = 'green';
-
-                // Add a delay before turning the light back to white
-                await new Promise(resolve => setTimeout(() => {
-                    this.lights[this.sequence[i]].color = 'white';
-                    resolve();
-                }, this.blinkDuration));
-
-                // Add another delay before the next blink
-                if (i < this.sequenceLength - 1) {
-                    await new Promise(resolve => setTimeout(resolve, this.blinkDuration));
-                }
-            }
-            this.currentlyBlinking=false;
-            console.log(this.sequence)
-        },
-        buttonPress(index){
-            if(index==this.sequence[this.sequenceIndex]){
-                this.sequenceIndex++;
-                if(this.sequenceIndex==this.sequenceLength){
-                    this.sequenceLength++;
-                    this.currentlyPlaying=false;
-                    this.currentlyBlinking=true;
-                }
+            if(this.gameover){
+                this.reset()
             }
             else{
-                this.gameover=true;
-                this.lights[index].color = 'red';
-                console.log("Game Over...");
-                this.GameOver();
+                console.log(this.blinkDuration);
+                this.currentlyBlinking= true;
+                this.currentlyPlaying=true;
+                this.sequenceIndex=0;   
+                // Generate a random index to change the light color
+                const randomIndex = Math.floor(Math.random() * this.lights.length);
+                this.sequence.push(randomIndex);
+                for (let i = 0; i < this.sequence.length; i++) {
+                    // Change the color of the selected light to yellow
+                    this.lights[this.sequence[i]].color = 'green';
+
+                    // Add a delay before turning the light back to white
+                    await new Promise(resolve => setTimeout(() => {
+                        this.lights[this.sequence[i]].color = 'rgb(189, 189, 218)';
+                        resolve();
+                    }, this.blinkDuration));
+
+                    // Add another delay before the next blink
+                    if (i < this.sequenceLength - 1) {
+                        await new Promise(resolve => setTimeout(resolve, this.blinkDuration));
+                    }
+                }
+                this.currentlyBlinking=false;
+                console.log(this.sequence)
+            }
+        },
+        buttonPress(index){
+            if(!this.currentlyBlinking && !this.gameover){
+                if(index==this.sequence[this.sequenceIndex]){
+                    this.sequenceIndex++;
+                    if(this.sequenceIndex==this.sequenceLength){
+                        this.sequenceLength++;
+                        this.currentlyPlaying=false;
+                        this.currentlyBlinking=true;
+                    }
+                }
+                else{
+                    this.gameover=true;
+                    this.lights[index].color = 'red';
+                    console.log("Game Over...");
+                    this.GameOver();
+                }
             }
         },
         GameOver(){
@@ -140,7 +149,7 @@ export default {
                 // e = ' '
                 // w = ':'
 
-                const score = this.sequenceLength
+                const score = this.sequenceLength-1
                 console.log(score)
                 const path = `/users/${uid}/simonsaysScores/${datepath}`;
 
@@ -164,7 +173,7 @@ export default {
                 });
 
 
-                const topPath = `/games/simonsays/highscores/`+displayPath+":"+datepath;
+                const topPath = `/games/simonsays/highscores/`+displayPath;
 
                 // Add the timer value under the "highscores" subfolder
                 set(ref(db, topPath), score).then(() => {
@@ -204,16 +213,24 @@ export default {
         },
         reset(){
             this.lights=[
-                { color: 'white' },
-                { color: 'white' },
-                { color: 'white' },
-                { color: 'white' }
+                { color: 'rgb(189, 189, 218)' },
+                { color: 'rgb(189, 189, 218)' },
+                { color: 'rgb(189, 189, 218)' },
+                { color: 'rgb(189, 189, 218)'}
             ];
             this.currentScore= 0;
             this.sequenceLength=1,
             this.currentlyBlinking = true;
             this.currentlyPlaying= false;
             this.gameover= false;
+            this.sequence=[];
+        },
+        getLightStyle(light, index) {
+
+            return {
+                backgroundColor: !this.currentlyBlinking ? 'white' : light.color,
+                // Add other styles as needed
+            };
         },
     },
     mounted() {
@@ -224,16 +241,30 @@ export default {
 
 <style scoped>
 @media (min-width: 769px) {
-    #lightBox {
-        max-width: 600px;
-        margin: auto;
-        border: solid;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    #lightBox{
+      max-width: 1200px;
+      width: 90%;
+      border: solid;
+      margin: auto;
+      display: flex;
+      justify-content: center;
+      background-color:bisque;
+      border-radius: 20px;
     }
-    .light {
+
+    .light, .disabledLight {
         margin: 1vw;
+        width: 10%;
+        font-size: large;
+        height: auto;
+        text-align: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    /* .disabledLight {
+        background-color: rgb(189, 189, 218);
+    } */
+    .light{
+        background-color: #ffffff;
     }
 }
 
