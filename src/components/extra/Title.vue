@@ -34,6 +34,16 @@ export default {
             padding-top: 3vw;
         }
     }
+    @media (max-width: 768px) {
+        h1{
+            text-decoration: underline;
+            text-align: center;
+            font-size: 7vw;
+            font-family: 'TitleFont', sans-serif;
+            padding-bottom: 3vw;
+            padding-top: 3vw;
+        }
+    }
 
     @media (max-width: 768px) {
 
