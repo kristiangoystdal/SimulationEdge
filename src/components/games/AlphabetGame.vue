@@ -60,8 +60,8 @@
   export default {
     data() {
       return {
-        alphabet: "abcdefghijklmnopqrstuvwxyz".split(""),
-        input: "".split(""),
+        alphabet: "abcdefghijklmnopqrstuvwxyz",
+        input: "",
         currentIndex: 0,
         startTime: null,
         timer: 0,
@@ -166,15 +166,7 @@
       },
 
       checkWin() {
-        let win = true;
-        // console.log(this.input + " vs " + this.alphabet)
-        for (let i = 0; i < this.alphabet.length; i++) {
-          if (this.input[i] !== this.alphabet[i]) {
-            win = false;
-            break;
-          }
-        }
-        if (win) {
+        if (this.input == this.alphabet) {
           this.stopTimer();
           this.done = true;
 
