@@ -35,6 +35,8 @@
     <div id="otherbox2">
       <div id="highscoreBoard">
         <div id="highscoreTitle">Highscores</div>
+        <div v-if="!emailVerified">Verify email to save scores in online lists</div>
+        <br>
         <div id="type">
           <div id="topList">
             <div id="topTitle">Top</div>
@@ -46,6 +48,7 @@
               </ul>
             </div>
           </div>
+          
           <div id="latestList">
             <div id="latestTitle">Latest</div>
             <div id="list">
@@ -197,6 +200,9 @@ export default {
     user() {
       return this.$store.getters.getCurrUser;
     },
+    verifiedEmail(){
+      return auth.currentUser.emailVerified;
+    }
   },
 };
 </script>
