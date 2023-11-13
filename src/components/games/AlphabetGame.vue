@@ -48,7 +48,7 @@
   import TitleVue from '../extra/Title.vue';
   import HighscoreComp from './HighscoreComp.vue';
   import { getAuth, onAuthStateChanged } from "firebase/auth";
-  import { getDatabase, ref, onValue, set, remove } from 'firebase/database';
+  import { getDatabase, ref, onValue, set, remove, get} from 'firebase/database';
 
   const db = getDatabase();
   const auth = getAuth();
@@ -206,24 +206,26 @@
             });
 
 
-            const topPath = `/games/alphabetgame/highscores/`+displayPath+":"+datepath;
+            const topPath = `/games/alphabetgame/highscores/` + displayPath;
 
+            // Get the current value at topPath
+            const currentScoreRef = ref(db, topPath);
+            get(currentScoreRef).then((snapshot) => {
+              const currentScore = snapshot.val();
 
-            // Add the timer value under the "highscores" subfolder
-            set(ref(db, topPath), time).then(() => {
-              // Data added successfully
-              this.updateTopScores();
+              // Check if the current score is smaller than the new time
+              if (currentScore - time > 0) {
+                // Update the value under the "highscores" subfolder
+                set(currentScoreRef, time).then(() => {
+                  // Data added successfully
+                }).catch((error) => {
+                  console.error('Error updating data:', error);
+                });
+              }
             }).catch((error) => {
-              console.error('Error adding data:', error);
+              console.error('Error retrieving data:', error);
             });
-              
-            // Add the timer value under the "highscores" subfolder
-            set(ref(db, topPath), time).then(() => {
-              // Data added successfully
-              this.updateTopScores();
-            }).catch((error) => {
-              console.error('Error adding data:', error);
-            });
+
           }
         }
       },
