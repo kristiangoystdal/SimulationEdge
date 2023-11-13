@@ -11,6 +11,13 @@
           <div id="label">
             <p><strong >Email:</strong> {{ userData.email }}</p>
           </div>
+          <div id="label" >
+            <p style="display: flex; align-items: center;">
+              <strong >Verified:</strong> 
+              <v-icon v-if="verifiedEmail" icon="mdi-check-circle" size="small"></v-icon>
+              <v-icon v-if="!verifiedEmail" icon="mdi-close-circle" size="small"></v-icon>
+            </p>
+          </div>
         
           <br>
           <v-btn
@@ -123,12 +130,14 @@ export default {
         email: value => (/.+@.+\..+/.test(value)) || 'Email must be valid',
         passwordmatch: value => value==this.password1 || "Password doesn't match",
       },
+      verified: false,
     };
   },
   created(){
     onAuthStateChanged(auth, (user) => {
         this.userData.username = user.displayName;
         this.userData.email = user.email;
+        this.verified = user.emailVerified;
     });
   },
   methods: {
@@ -208,6 +217,11 @@ export default {
 
 
   },
+  computed: {
+    verifiedEmail(){
+      return auth.currentUser.emailVerified;
+    },
+  }
 };
 </script>
 
