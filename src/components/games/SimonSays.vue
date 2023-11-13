@@ -264,15 +264,33 @@ export default {
         text-align: center;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    /* .disabledLight {
-        background-color: rgb(189, 189, 218);
-    } */
     .light{
         background-color: #ffffff;
     }
 }
 
 @media (max-width: 768px) {
-    
+    #lightBox{
+      max-width: 1200px;
+      width: 90%;
+      border: solid;
+      margin: auto;
+      display: flex;
+      justify-content: center;
+      background-color:bisque;
+      border-radius: 20px;
+    }
+
+    .light, .disabledLight {
+        margin: 1vw;
+        width: 10%;
+        font-size: large;
+        height: auto;
+        text-align: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .light{
+        background-color: #ffffff;
+    }
 }
 </style>
