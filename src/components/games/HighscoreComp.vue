@@ -382,11 +382,12 @@ export default {
     #reset-button{
       width: auto;
       text-align: center;
-      padding: 0.5vw 1.5vw;
-      height: auto;
+      padding: 0.5vw 3vw;
+      height: 12vw !important;
       background-color: white;
       border-radius: 2vw;
       border: solid;
+      font-family: 'TitleFont';
     }
     #userList{
       width: 80%;
