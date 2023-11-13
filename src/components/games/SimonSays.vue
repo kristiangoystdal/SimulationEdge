@@ -70,11 +70,11 @@ export default {
     },
     computed:{
         blinkDuration() {
-            if(this.sequenceLength>20){
+            if(this.sequenceLength>8){
                 return 500
             }
             else{
-                return 1000-(25*(this.sequenceLength-1));
+                return 700-(25*(this.sequenceLength-1));
             }
         },
         user() {
@@ -258,11 +258,12 @@ export default {
 
     .light, .disabledLight {
         margin: 1vw;
-        width: 10%;
+        width: 12%;
+        height: 50px !important;
         font-size: large;
         height: auto;
         text-align: center;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'TitleFont';
     }
     .light{
         background-color: #ffffff;
@@ -270,24 +271,29 @@ export default {
 }
 
 @media (max-width: 768px) {
-    #lightBox{
-      max-width: 1200px;
-      width: 90%;
-      border: solid;
-      margin: auto;
-      display: flex;
-      justify-content: center;
-      background-color:bisque;
-      border-radius: 20px;
+    #lightBox {
+        max-width: 1200px; /* Set the max-width for the 2x2 grid */
+        width: 90%;
+        border: solid;
+        margin: auto;
+        padding: 10px;
+        display: flex; /* Use flex container */
+        flex-wrap: wrap; /* Allow buttons to wrap to the next row */
+        justify-content: center;
+        align-items: center; /* Center vertically */
+        background-color: bisque;
+        border-radius: 20px;
+        overflow: auto;
     }
 
-    .light, .disabledLight {
-        margin: 1vw;
-        width: 10%;
-        font-size: large;
-        height: auto;
+    .light,
+    .disabledLight {
+        margin: 10px; /* Set margin to create space between buttons */
+        width: 35vw !important;
+        height: 35vw !important;
+        font-size: x-large;
         text-align: center;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'TitleFont';
     }
     .light{
         background-color: #ffffff;
