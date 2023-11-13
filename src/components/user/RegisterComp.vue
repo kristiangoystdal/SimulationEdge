@@ -93,6 +93,7 @@
         setPersistence,
         browserLocalPersistence,
         updateProfile,
+        sendEmailVerification,
     } from "firebase/auth";
     import { mapActions } from 'vuex';
     import { getDatabase, ref, onValue, set, remove} from 'firebase/database';
@@ -147,6 +148,7 @@
                             const user = userCredential.user;
                             this.$emit('user', user);
                             this.setUser(auth.currentUser);
+                            sendEmailVerification(user);
                             this.$router.push('/');
 
                             // Add the username-userID pair to the database
