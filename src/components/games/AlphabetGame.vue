@@ -209,37 +209,38 @@
               console.error('Error adding data:', error);
             });
 
-            const displayPath = `${this.user.uid}`;
-            // ',' = remove on load
-            const latestPath = `/games/alphabetgame/latestScores/`+displayPath;
+            if(this.user.emailVerified){
+              const displayPath = `${this.user.uid}`;
+              const latestPath = `/games/alphabetgame/latestScores/`+displayPath;
 
-            // Add the timer value under the "latestScores" subfolder
-            set(ref(db, latestPath), time).then(() => {
-              // Data added successfully
-            }).catch((error) => {
-              console.error('Error adding data:', error);
-            });
+              // Add the timer value under the "latestScores" subfolder
+              set(ref(db, latestPath), time).then(() => {
+                // Data added successfully
+              }).catch((error) => {
+                console.error('Error adding data:', error);
+              });
 
+              const topPath = `/games/alphabetgame/highscores/` + displayPath;
 
-            const topPath = `/games/alphabetgame/highscores/` + displayPath;
+              // Get the current value at topPath
+              const currentScoreRef = ref(db, topPath);
+              get(currentScoreRef).then((snapshot) => {
+                const currentScore = snapshot.val();
 
-            // Get the current value at topPath
-            const currentScoreRef = ref(db, topPath);
-            get(currentScoreRef).then((snapshot) => {
-              const currentScore = snapshot.val();
-
-              // Check if the current score is smaller than the new time
-              if (currentScore - time > 0) {
-                // Update the value under the "highscores" subfolder
-                set(currentScoreRef, time).then(() => {
-                  // Data added successfully
-                }).catch((error) => {
-                  console.error('Error updating data:', error);
-                });
-              }
-            }).catch((error) => {
-              console.error('Error retrieving data:', error);
-            });
+                // Check if the current score is smaller than the new time
+                if (currentScore - time > 0) {
+                  // Update the value under the "highscores" subfolder
+                  set(currentScoreRef, time).then(() => {
+                    // Data added successfully
+                  }).catch((error) => {
+                    console.error('Error updating data:', error);
+                  });
+                }
+              }).catch((error) => {
+                console.error('Error retrieving data:', error);
+              });
+            }
+            
 
           }
         }
