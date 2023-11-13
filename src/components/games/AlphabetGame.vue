@@ -22,12 +22,16 @@
       id="inputField" 
       type="text"
       v-model="mobileInput"
-      @keydown="handleKeyDown"
+      @input="handleMobileKey"
+      @keydown="handleMobileKeyDown"
+      ref="mobileInput"
       >
   </div>
-  <div>
+  <!-- <div>
     {{ consoleLog }}
-  </div>
+    {{ pressedKey }}
+    {{ isMobile }}
+  </div> -->
 
   <HighscoreComp 
     :scoreTitle='scoreTitle' 
@@ -73,6 +77,7 @@
         resetButtonText: "Reset",
         mobileInput: '',
         consoleLog: '',
+        pressedKey: null,
       };
     },
     components: {
@@ -85,6 +90,10 @@
       },
       user() {
         return this.$store.getters.getCurrUser;
+      },
+      isMobile(){
+        const mobileWidthThreshold = 768; // Adjust as needed based on your design
+        return window.innerWidth <= mobileWidthThreshold;
       },
 
     },
@@ -103,45 +112,59 @@
         clearInterval(this.intervalId);
       },
       handleKeyDown(event) {
-        this.consoleLog= event.key;
-        if (event.key === 'Backspace') {
-          if (this.currentIndex > 0) {
-            this.currentIndex--;
-            this.input = this.input.replace(/.$/, '');
-          }
-        } else if (event.key === 'Escape') {
-          this.reset();
-        } else if (this.currentIndex < this.alphabet.length) {
-          if (event.key.toLowerCase() === 'a' && this.currentIndex === 0) {
-            this.startTimer();
-          }
+        if(!this.isMobile){
+          if (event.key === 'Backspace') {
+            if (this.currentIndex > 0) {
+                this.currentIndex--;
+                this.input = this.input.replace(/.$/, '');
+            }
+          } else if (event.key === 'Escape') {
+              this.reset();
+          } else if (this.currentIndex < this.alphabet.length) {
+              if (event.key.toLowerCase() === 'a' && this.currentIndex === 0) {
+                  this.startTimer();
+              }
 
-          this.input += event.key;
-          this.currentIndex++;
-          this.checkWin();
+              this.input += event.key;
+              this.currentIndex++;
+              this.checkWin();
+          }
         }
       },
-      handleKeyDownMobile(){
-        // if (event.key === 'Backspace') {
-        //   if (this.currentIndex > 0) {
-        //     this.currentIndex--;
-        //     this.input = this.input.replace(/.$/, '');
-        //   }
-        // } else if (event.key === 'Escape') {
-        //   this.reset();
-        // } 
-        if (this.currentIndex < this.alphabet.length) {
-          this.consoleLog = this.mobileInput;
-          if (mobileInput.toLowerCase() === 'a' && this.currentIndex === 0) {
-            this.startTimer();
-          }
 
-          this.input += mobileInput;
-          this.currentIndex++;
-          this.checkWin();
-          this.mobileInput = '';
+      handleMobileKey() {
+        // Check if the input field is focused
+        const isInputFocused = document.activeElement === this.$refs.mobileInput;
+
+        // On mobile, the 'input' event is used to capture changes in the input field
+        if (isInputFocused) {
+          this.pressedKey = this.$refs.mobileInput.value.slice(-1);
+          this.pressedKey = this.pressedKey.toLowerCase();
+          // Handle the pressed key as needed
+          this.consoleLog = (`Pressed Key: ${this.pressedKey}`);
+          if (this.pressedKey === 'Backspace') {
+            if (this.currentIndex > 0) {
+                this.currentIndex--;
+                this.input = this.input.replace(/.$/, '');
+            }
+          } else if (this.currentIndex < this.alphabet.length) {
+              if (this.pressedKey.toLowerCase() === 'a' && this.currentIndex === 0) {
+                  this.startTimer();
+                  this.consoleLog = "Start";
+              }
+
+              this.input += this.pressedKey;
+              this.currentIndex++;
+              this.checkWin();
+              this.mobileInput = '';
+          }
         }
       },
+      handleMobileKeyDown(event) {
+        // Prevent default to avoid issues with certain key presses
+        event.preventDefault();
+      },
+
       checkWin() {
         let win = true;
         // console.log(this.input + " vs " + this.alphabet)
