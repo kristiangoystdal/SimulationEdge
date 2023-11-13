@@ -33,7 +33,7 @@
 import TitleVue from '../extra/Title.vue';
 import HighscoreComp from './HighscoreComp.vue';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getDatabase, ref, onValue, set, remove } from 'firebase/database';
+import { getDatabase, ref, onValue, set, remove, get } from 'firebase/database';
 
 const db = getDatabase();
 const auth = getAuth();
@@ -74,7 +74,6 @@ export default {
                 return 500
             }
             else{
-                console.log("Calc");
                 return 1000-(25*(this.sequenceLength-1));
             }
         },
@@ -96,7 +95,6 @@ export default {
                 this.reset()
             }
             else{
-                console.log(this.blinkDuration);
                 this.currentlyBlinking= true;
                 this.currentlyPlaying=true;
                 this.sequenceIndex=0;   
@@ -119,7 +117,6 @@ export default {
                     }
                 }
                 this.currentlyBlinking=false;
-                console.log(this.sequence)
             }
         },
         buttonPress(index){
@@ -135,7 +132,6 @@ export default {
                 else{
                     this.gameover=true;
                     this.lights[index].color = 'red';
-                    console.log("Game Over...");
                     this.GameOver();
                 }
             }
@@ -150,13 +146,11 @@ export default {
                 // w = ':'
 
                 const score = this.sequenceLength-1
-                console.log(score)
                 const path = `/users/${uid}/simonsaysScores/${datepath}`;
 
-                // Add the timer value under the "alphabetScores" subfolder
+                // Add the timer value under the "simonsays" subfolder
                 set(ref(db, path), score).then(() => {
                 // Data added successfully
-                console.log("Added to user");
                 }).catch((error) => {
                 console.error('Error adding data:', error);
                 });
@@ -173,14 +167,24 @@ export default {
                 });
 
 
-                const topPath = `/games/simonsays/highscores/`+displayPath;
+                const topPath = `/games/simonsays/highscores/` + displayPath;
 
-                // Add the timer value under the "highscores" subfolder
-                set(ref(db, topPath), score).then(() => {
-                // Data added successfully
-                this.updateTopScores();
+                // Get the current value at topPath
+                const currentScoreRef = ref(db, topPath);
+                get(currentScoreRef).then((snapshot) => {
+                    const currentScore = snapshot.val();
+
+                    // Check if the current score is smaller than the new time
+                    if (currentScore - score < 0 || currentScore == null) {
+                        // Update the value under the "highscores" subfolder
+                        set(currentScoreRef, score).then(() => {
+                        // Data added successfully
+                        }).catch((error) => {
+                        console.error('Error updating data:', error);
+                        });
+                    }
                 }).catch((error) => {
-                console.error('Error adding data:', error);
+                    console.error('Error retrieving data:', error);
                 });
             }
             else{
