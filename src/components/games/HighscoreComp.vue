@@ -35,7 +35,8 @@
     <div id="otherbox2">
       <div id="highscoreBoard">
         <div id="highscoreTitle">Highscores</div>
-        <div v-if="!emailVerified">Verify email to save scores in online lists</div>
+        <div v-if="!user">Sign in to save scores</div>
+        <div v-else-if="!verifiedEmail">Verify email to save scores in online lists</div>
         <br>
         <div id="type">
           <div id="topList">
@@ -164,6 +165,7 @@ export default {
   methods: {
     fetchDataAfterUserSet() {
       if (this.$store.getters.getCurrUser != null) {
+
         const tempUser = this.$store.getters.getCurrUser;
         const uid = tempUser.uid;
         const userScoresRef = ref(db, `/users/${uid}/${this.userScoresPath}`);
