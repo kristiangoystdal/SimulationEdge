@@ -3,19 +3,18 @@
     <div id="toolTitle">User Tools</div>
     <div id="toolsList">
       <div id="tool" v-if="!verifiedEmail">
-        <v-btn @click="sendMail">
-          Verify e-mail
+        <v-btn @click="sendMail" :disabled="sentVerifyMail" :loading="loading1">
+          <div v-if="!sentVerifyMail">Verify e-mail</div>
+          <div v-if="sentVerifyMail">Verify e-mail sent</div>
         </v-btn>
       </div>
       <div id="tool">
-        <v-btn @click="passwordReset">Reset Password</v-btn>
+        <v-btn @click="passwordReset" :disabled="sentResetMail" :loading="loading2">
+          <div v-if="!sentResetMail">Reset Password e-mail</div>
+          <div v-if="sentResetMail">Reset e-mail sent</div>
+        </v-btn>
       </div>
     </div>
-    
-    
-    
-
-    
   </div>
 </template>
 
@@ -28,6 +27,7 @@ import {
   
 } from "firebase/auth";
 
+
 const auth = getAuth();
 const currentUser = auth.currentUser;
 
@@ -35,7 +35,10 @@ export default {
   name: 'UserTools',
   data() {
       return {
-
+        sentVerifyMail: false,
+        sentResetMail: false,
+        loading1: false,
+        loading2: false,
       };
   },
   components: {
@@ -50,11 +53,31 @@ export default {
   },
   methods:{
     sendMail(){
+      this.loading1 = true;
+
+      setTimeout(() => (this.loading1 = false), 2000);
+
       sendEmailVerification(currentUser);
+
+      this.sentVerifyMail = true;
     },
     passwordReset(){
-      sendPasswordResetEmail(auth, currentUser.email);
-    }
+      this.loading2 = true;
+
+      setTimeout(() => (this.loading2 = false), 2000);
+
+      sendPasswordResetEmail(auth, currentUser.email)
+      .then(() => {
+        // Password reset email sent successfully
+        console.log("Password reset email sent!");
+      })
+      .catch((error) => {
+        // Handle errors
+        console.error("Error sending password reset email:", error.message);
+      });
+
+      this.sentResetMail = true;
+    },
   }
 }
 </script>
@@ -74,7 +97,6 @@ export default {
     font-size: 1.5vw;
     font-family: 'TitleFont';
     text-decoration: underline;
-
   }
   #toolsList{
     display: flex;
