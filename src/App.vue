@@ -27,27 +27,25 @@
 </script>
 
 <style >
-  body {
-      background-image: url('./assets/photos/gradient.png');
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      background-size: cover;
-  }
-  /* #app {
-    min-height: 100vh; 
-    margin: 0; 
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-image: url('./assets/photos/bigger-gradient.png');
+    background-repeat: repeat-y; /* Repeat the image vertically */
+    background-size:auto;
   }
 
-  #content{
-    min-height: 100vh;
-  }
 
-  #router{
-    min-height: 100vh;
-  } */
+#content {
+  position: relative;
+  z-index: 1;
+}
 
-  Footer{
-    position: relative;
-  }
+Footer {
+  position: relative;
+  z-index: 2;
+}
+
 
 </style>
