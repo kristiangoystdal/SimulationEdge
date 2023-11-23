@@ -19,9 +19,15 @@
             </router-link>
           </div>
           <div class="gridItem">
-            <router-link to="/under-development" class="game-item">
+            <router-link to="/games/simon-says" class="game-item">
+              <img src="../../assets/photos/SimonSaysLogo.png" alt="Game" class="round-image">
+              <span class="under-text">Simon Says</span>
+            </router-link>
+          </div>
+          <div class="gridItem">
+            <router-link to="/games" class="game-item">
               <img src="../../assets/photos/coming_soon.png" alt="Game" class="round-image">
-              <span class="under-text">Coming Soon</span>
+              <span class="under-text">Flappy Bird</span>
             </router-link>
           </div>
         </div>
@@ -115,7 +121,7 @@
 
       .round-image {
         border-radius: 50%;
-        width: 30vw;
+        width: 50vw;
         height: auto;
         padding: 1vw;
       }
@@ -123,7 +129,7 @@
       .under-text {
         color: black;
         text-decoration: none;
-        font-size: 3vw;
+        font-size: 5vw;
         text-align: center;
         font-family: 'TitleFont', sans-serif;
         color: white;

@@ -1,8 +1,6 @@
-<template>
-    <div>{{ user.displayName }}</div>  
+<template> 
     <div id="logout-box">
       <input type="submit" id="logOut" name="logOut" value="Log Out" @click="logOut">
-      
     </div>
 </template>
     

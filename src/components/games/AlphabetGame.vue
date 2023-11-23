@@ -17,171 +17,85 @@
     </div>
     
   </v-container>
-
-  <div id="other">
-    <div id="otherbox">
-      <div id="user">
-        <div id="timer">Time: {{ formattedTimer }} seconds</div>
-        <div id="done-text" v-if="done">{{ doneText }}</div>
-        <v-btn id="reset-button" @click="reset">
-          Reset
-        </v-btn>
-        
-        <div id="userList" v-if="user">
-          <div id="userTitle">Personal Best</div>
-          <div id="list" v-if="!noscores">
-            <ul>
-              <li v-for="(value, key) in userScores" :key="key">
-                  {{ value }} - {{ key }}
-              </li>
-            </ul>
-          </div>
-          <div v-else>
-            You have no scores yet...
-          </div>
-        </div>
-
-        <div v-else>
-          Sign in to save scores
-        </div>
-        
-      </div>
-    </div>
-    
-    <div id="otherbox">
-      <div id="highscoreBoard">
-        <div id="highscoreTitle">Highscores</div>
-        <div id="type">
-          <div id="topList">
-            <div id="topTitle">Top</div>
-            <div id="list">
-              <ul>
-                <li v-for="(item, key) in topScores" :key="key">
-                  {{ item[1] }} - {{ item[0] }}
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div id="latestList">
-            <div id="latestTitle">Latest</div>
-            <div id="list">
-              <ul>
-                <li v-for="(value, key) in latestScores" :key="key">
-                  {{ value }} - {{ key }}
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
+  <div id="mobileBox">
+      <input 
+      id="inputField" 
+      type="text"
+      v-model="mobileInput"
+      @input="handleMobileKey"
+      @keydown="handleMobileKeyDown"
+      ref="mobileInput"
+      >
   </div>
-    
+  <!-- <div>
+    {{ consoleLog }}
+    {{ pressedKey }}
+    {{ isMobile }}
+  </div> -->
+
+  <HighscoreComp 
+    :scoreTitle='scoreTitle' 
+    :userScoresPath="userPath"
+    :databasePath="dbPath" 
+    :resetFunction="reset" 
+    :score="formattedTimer"
+    :scoreLabel="label"
+    :sortWay="highToLow"
+    :buttonDisable="resetButtonState"
+    :buttonText="resetButtonText"
+    :buttonFunction="reset"
+  >
+  </HighscoreComp>    
 </template>
   
 <script>
   import TitleVue from '../extra/Title.vue';
-  import { getDatabase, ref, onValue, set, remove} from 'firebase/database';
-  
+  import HighscoreComp from './HighscoreComp.vue';
+  import { getAuth, onAuthStateChanged } from "firebase/auth";
+  import { getDatabase, ref, onValue, set, remove, get} from 'firebase/database';
+
   const db = getDatabase();
+  const auth = getAuth();
 
   export default {
     data() {
       return {
-        alphabet: "abcdefghijklmnopqrstuvwxyz".split(""),
-        input: "".split(""),
+        alphabet: "abcdefghijklmnopqrstuvwxyz",
+        input: "",
         currentIndex: 0,
         startTime: null,
         timer: 0,
         intervalId: null,
-        doneText: "Congratulations! You did it!",
         done: false,
-        win: null,
         pageTitle: "The Alphabet Game",
-        topScores: [],
-        latestScores: {}, 
-        userScores: {},
-        noscores: false,
+        dbPath: "alphabetgame",
+        userPath: "alphabetScores",
+        scoreTitle: "Time",
+        label: "seconds",
+        highToLow: true,
+        resetButtonState:true,
+        resetButtonText: "Reset",
+        mobileInput: '',
+        consoleLog: '',
+        pressedKey: null,
       };
     },
     components: {
       TitleVue,
-    },
-    created() {
-      const topScoresRef = ref(db, '/games/alphabetgame/highscores');
-
-      onValue(topScoresRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
-          dataArray.sort((a, b) => a.value - b.value);
-          this.topScores = {};
-          var index = 0;
-          dataArray.forEach((item) => {
-            const keyParts = item.key.split(',');
-            const key = keyParts[0];
-            const value = item.value;
-            this.topScores[index] = [key, value];
-            index = index + 1;
-          });
-
-        }
-      });
-
-      const latestScoresRef = ref(db, '/games/alphabetgame/latestScores');
-
-      onValue(latestScoresRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
-          this.latestScores = {};
-          dataArray.forEach((item) => {
-            const keyParts = item.key.split(',');
-            const key = keyParts[0];
-            const value = item.value;
-            this.latestScores[key] = value;
-          });
-        }
-      });
-
-      if(this.$store.getters.getCurrUser!=null){
-        const tempUser = this.$store.getters.getCurrUser;
-        const uid = tempUser.uid;
-        const userScoresRef = ref(db, `/users/${uid}/alphabetScores`);
-
-        onValue(userScoresRef, (snapshot) => {
-          if(snapshot.exists()){
-            this.noscores = false;
-            const data = snapshot.val();
-
-            if (data) {
-              const dataArray = Object.entries(data).map(([key, value]) => ({ key, value }));
-              dataArray.sort((a, b) => a.value - b.value);
-              this.userScores = {};
-              dataArray.forEach((item) => {
-                const dateStr = item.key;
-                const modifiedDateStr = dateStr.replace(/q/g, '-').replace(/e/g, ' ').replace(/w/g, ':');
-
-                this.userScores[modifiedDateStr] = item.value;
-              });
-            }
-          } 
-          else{
-            this.noscores = true;
-          }       
-          
-        });
-      }
-      
+      HighscoreComp,
     },
     computed: {
       formattedTimer() {
-        return this.timer.toFixed(2);
+        return parseFloat(this.timer.toFixed(2));
       },
       user() {
         return this.$store.getters.getCurrUser;
       },
+      isMobile(){
+        const mobileWidthThreshold = 768; // Adjust as needed based on your design
+        return window.innerWidth <= mobileWidthThreshold;
+      },
+
     },
     methods: {
       startTimer() {
@@ -198,41 +112,89 @@
         clearInterval(this.intervalId);
       },
       handleKeyDown(event) {
-        if (event.key === 'Backspace') {
-          if (this.currentIndex > 0) {
-            this.currentIndex--;
-            this.input = this.input.replace(/.$/, '');
-          }
-        } 
-        else if (event.key === 'Escape') {
-          this.reset();
-        } 
-        else if (this.currentIndex < this.alphabet.length) {
-          if (event.key.toLowerCase() === 'a' && this.currentIndex === 0) {
-            this.startTimer();
-          }
+        if(!this.isMobile){
+          if (event.key === 'Backspace') {
+            if (this.currentIndex > 0) {
+                this.currentIndex--;
+                this.input = this.input.replace(/.$/, '');
+            }
+          } else if (event.key === 'Escape') {
+              this.reset();
+          } else if (this.currentIndex < this.alphabet.length) {
+              if (event.key.toLowerCase() === 'a' && this.currentIndex === 0) {
+                  this.startTimer();
+              }
 
-          this.input += event.key;
-          this.currentIndex++;
-          this.checkWin()
+              this.input += event.key;
+              this.currentIndex++;
+              this.checkWin();
+          }
         }
       },
-      checkWin() {
-        let win = true;
-        for (let i = 0; i < this.alphabet.length; i++) {
-          if (this.input[i] !== this.alphabet[i]) {
-            win = false;
-            break;
+
+      handleMobileKey() {
+        // Check if the input field is focused
+        const isInputFocused = document.activeElement === this.$refs.mobileInput;
+
+        // On mobile, the 'input' event is used to capture changes in the input field
+        if (isInputFocused) {
+          this.pressedKey = this.$refs.mobileInput.value.slice(-1);
+          this.pressedKey = this.pressedKey.toLowerCase();
+          // Handle the pressed key as needed
+          this.consoleLog = (`Pressed Key: ${this.pressedKey}`);
+          if (this.pressedKey === 'Backspace') {
+            if (this.currentIndex > 0) {
+                this.currentIndex--;
+                this.input = this.input.replace(/.$/, '');
+            }
+          } else if (this.currentIndex < this.alphabet.length) {
+              if (this.pressedKey.toLowerCase() === 'a' && this.currentIndex === 0) {
+                  this.startTimer();
+                  this.consoleLog = "Start";
+              }
+
+              this.input += this.pressedKey;
+              this.currentIndex++;
+              this.checkWin();
+              this.mobileInput = '';
           }
         }
-        if (win) {
+      },
+      handleMobileKeyDown(event) {
+        // Prevent default to avoid issues with certain key presses
+        event.preventDefault();
+      },
+
+      checkWin() {
+        if (this.input == this.alphabet) {
           this.stopTimer();
           this.done = true;
 
           if (this.user) {
             const uid = this.user.uid;
             const date = new Date();
-            const datepath = date.getDate()+'q'+date.getMonth()+'q'+date.getFullYear()+'e'+date.getHours()+'w'+date.getMinutes()+'w'+date.getSeconds(); 
+            var datepath = date.getDate()+'q'+date.getMonth()+'q'+date.getFullYear()+'e';
+            
+            if(date.getHours()<10){
+              datepath+="0"+date.getHours();
+            }
+            else{
+              datepath+=date.getHours();
+            }
+            datepath+="w";
+            if(date.getMinutes()<10){
+              datepath+="0"+date.getMinutes();
+            }
+            else{
+              datepath+=date.getMinutes();
+            }
+            datepath+="w";
+            if(date.getSeconds()<10){
+              datepath+="0"+date.getSeconds();
+            }
+            else{
+              datepath+=date.getSeconds();
+            }
             // q = '-'
             // e = ' '
             // w = ':'
@@ -247,27 +209,38 @@
               console.error('Error adding data:', error);
             });
 
-            const displayPath = `${this.user.displayName}`+','+ `${datepath}` ;
-            // ',' = remove on load
-            const latestPath = `/games/alphabetgame/latestScores/`+displayPath;
+            if(this.user.emailVerified){
+              const displayPath = `${this.user.uid}`;
+              const latestPath = `/games/alphabetgame/latestScores/`+displayPath;
 
-            // Add the timer value under the "latestScores" subfolder
-            set(ref(db, latestPath), time).then(() => {
-              // Data added successfully
-            }).catch((error) => {
-              console.error('Error adding data:', error);
-            });
+              // Add the timer value under the "latestScores" subfolder
+              set(ref(db, latestPath), time).then(() => {
+                // Data added successfully
+              }).catch((error) => {
+                console.error('Error adding data:', error);
+              });
 
+              const topPath = `/games/alphabetgame/highscores/` + displayPath;
 
-            const topPath = `/games/alphabetgame/highscores/`+displayPath;
+              // Get the current value at topPath
+              const currentScoreRef = ref(db, topPath);
+              get(currentScoreRef).then((snapshot) => {
+                const currentScore = snapshot.val();
 
-            // Add the timer value under the "highscores" subfolder
-            set(ref(db, topPath), time).then(() => {
-              // Data added successfully
-              this.updateTopScores();
-            }).catch((error) => {
-              console.error('Error adding data:', error);
-            });
+                // Check if the current score is smaller than the new time
+                if (currentScore - time > 0) {
+                  // Update the value under the "highscores" subfolder
+                  set(currentScoreRef, time).then(() => {
+                    // Data added successfully
+                  }).catch((error) => {
+                    console.error('Error updating data:', error);
+                  });
+                }
+              }).catch((error) => {
+                console.error('Error retrieving data:', error);
+              });
+            }
+            
 
           }
         }
@@ -294,24 +267,20 @@
               });
             }
           }
-        });
-        
+        });  
       },
-      insertRandomValues(){
-        for(var i = 0; i<20; i++){
-          console.log(i)
+      insertRandomValues() {
+        for (let i = 0; i < 20; i++) {
           const randomFloat = Math.random();
           const path = randomFloat.toString().replace(/\./g, '');
-          const topPath = `/games/alphabetgame/highscores/`+ path;
+          const topPath = `/games/alphabetgame/highscores/` + path;
 
-          // Add the timer value under the "highscores" subfolder
           set(ref(db, topPath), randomFloat).then(() => {
             // Data added successfully
           }).catch((error) => {
             console.error('Error adding data:', error);
           });
         }
-        
       },
       reset() {
         this.input = "";
@@ -330,6 +299,7 @@
     },
   };
 </script>
+
 
 
 <style scoped>
@@ -504,94 +474,33 @@
     }
 
 
-    /* @media (min-width: 769px) {
-        #game {
-            justify-content: center;
-            text-align: center;
-            margin: 4vw auto;
-        }
-        
-        #alphabet {
-            display: inline-block;
-            margin: 3vw auto;
-            border-radius: 2vw;
-            padding: 1vw;
-            background-color: purple;
-            width: 90%;
-            height: auto;
-        }
-        
-        #alphabet span{
-            font-size: 4vw;
-            padding: 0.7%;
-        }
-        
-        #input-letter{
-            font-size: 5vw;
-            margin-bottom: 2vw;
-            width: 5%;
-            text-align: center;
-        }
-
-        #timer{
-            margin: 1vw;
-            font-size: 3vw;
-        }
-
-        #reset-button{
-            width: 10vw;
-            height: auto;
-            padding: 2vw;
-            font-size: 2vw;
-            margin: 5vw auto;
-            background-color: white;
-            border-radius: 2vw;
-            border: solid;
+    @media (min-width: 769px) {
+        #mobileBox{
+          display: none;
         }
     }
 
     @media (max-width: 768px) {
-        #game {
-            justify-content: center;
-            text-align: center;
-            margin: 10vw auto;
+        #mobileBox{
+          max-width: 1200px;
+          width: 90%;
+          height: 50px;
+          border: solid;
+          margin: auto;
+          display: flex;
+          margin: 2vw auto;
+          justify-content: center;
+          background-color:bisque;
+          border-radius: 20px;
         }
-        
-        #alphabet {
-            display: inline-block;
-            margin: 5vw auto;
-            border-radius: 2vw;
-            padding: 1vw;
-            background-color: purple;
-            width: 90%;
-        }
-        
-        #alphabet span{
-            font-size: auto;
-            padding: 0.5%;
-        }
-        
-        #input-letter, #current-letter {
-            font-size: 10vw;
-            margin-bottom: 2vw;
-            width: 10%;
-            text-align: center;
-        }
-
-        #timer{
-            margin: 1vw;
-            font-size: 5vw;
-        }
-
         #reset-button{
-            width: 20vw;
-            height: auto;
-            padding: 2vw;
-            font-size: auto;
-            margin: 5vw auto;
-            background-color: white;
-            border-radius: 2vw;
-            border: solid;
+          width: 20%;
+          text-align: center;
+          padding: 3vw;
+          height: 50px;
+          background-color: white;
+          border-radius: 2vw;
+          border: solid;
         }
-    } */
+    }
 </style>

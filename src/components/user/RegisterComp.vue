@@ -12,7 +12,7 @@
             <v-text-field
             v-model="username"
             :readonly="loading"
-            :rules="[rules.required]"
+            :rules="[rules.required, rules.noSpaces]"
             clearable
             label="Username"
             placeholder="Enter your username"
@@ -33,7 +33,7 @@
             <v-text-field
             v-model="password1"
             :readonly="loading"
-            :rules="[rules.required, rules.min, rules.digit, rules.capital]"
+            :rules="[rules.required, rules.min, rules.digit, rules.capital, rules.noSpacePassword]"
             clearable
             label="Password"
             placeholder="Enter your password"
@@ -93,8 +93,12 @@
         setPersistence,
         browserLocalPersistence,
         updateProfile,
+        sendEmailVerification,
     } from "firebase/auth";
     import { mapActions } from 'vuex';
+    import { getDatabase, ref, onValue, set, remove} from 'firebase/database';
+
+    const db = getDatabase();
     
     export default {
         components: {
@@ -105,40 +109,61 @@
             
             // Handle registration
             register() {
-                if(!this.form) return
+                if (!this.form) return;
 
-                this.loading = true
+                this.loading = true;
 
-                setTimeout(() => (this.loading = false), 2000)
+                setTimeout(() => (this.loading = false), 2000);
 
                 const email_signin = this.email;
                 const password_signin = this.password1;
-        
+                const username = this.username;
+
                 const auth = getAuth();
-                // Set persistence to LOCAL to enable persistent authentication
-                setPersistence(auth, browserLocalPersistence)
-                .then(() => {
-                    // Create user with email and password
-                    return createUserWithEmailAndPassword(auth, email_signin, password_signin);
-                })
-                .then((userCredential) => {
-                    updateProfile(auth.currentUser, {
-                        displayName: this.username, photoURL: ""
-                    }).catch((error) => {
-                        alert(error.message);
-                    });
-                    // Registration successful
-                    const user = userCredential.user;
-                    this.$emit('user', user);
-                    this.setUser(auth.currentUser);
-                    this.$router.push('/');
-                })
-                .catch((error) => {
-                    // Handle registration error
-                    console.log(error.code);
-                    alert(error.message);
-                });  
+
+                // Check if the username is already taken
+                const usernameRef = ref(db, `/username/${username}`);
+                console.log(usernameRef);
+                onValue(usernameRef, (snapshot)=>{
+                    if (snapshot.exists()) {
+                        // The username is already taken; handle this case accordingly
+                        alert('Username is already taken. Please choose another.');
+                        console.log("Taken");
+                    } 
+                    else {
+                        // Username is available; proceed with registration
+                        setPersistence(auth, browserLocalPersistence)
+                        .then(() => {
+                            // Create user with email and password
+                            return createUserWithEmailAndPassword(auth, email_signin, password_signin);
+                        })
+                        .then((userCredential) => {
+                            updateProfile(auth.currentUser, {
+                            displayName: username,
+                            photoURL: ""
+                            }).catch((error) => {
+                            alert(error.message);
+                            });
+                            // Registration successful
+                            const user = userCredential.user;
+                            this.$emit('user', user);
+                            this.setUser(auth.currentUser);
+                            sendEmailVerification(user);
+                            this.$router.push('/');
+
+                            // Add the username-userID pair to the database
+                            const userId = user.uid;
+                            set(ref(db, `/username/${userId}`), username);
+                        })
+                        .catch((error) => {
+                            // Handle registration error
+                            console.log(error.code);
+                            alert(error.message);
+                        });
+                    }
+                });
             },
+
             
         },
         data() {
@@ -158,6 +183,18 @@
                     capital: value => (/[A-Z]/.test(value)) || 'Password must include a capital letter',
                     email: value => (/.+@.+\..+/.test(value)) || 'Email must be valid',
                     passwordmatch: value => value==this.password1 || "Password doesn't match",
+                    noSpaces: (value) => {
+                        if (/\s/.test(value)) {
+                            return "Username cannot contain spaces";
+                        }
+                        return true;
+                    },
+                    noSpaces: (value) => {
+                        if (/\s/.test(value)) {
+                            return "Password cannot contain spaces";
+                        }
+                        return true;
+                    },
                 },
             }
         },
