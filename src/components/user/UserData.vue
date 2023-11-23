@@ -231,6 +231,7 @@ export default {
   margin: 1vw auto;
   padding: 10px;
   max-width: 600px;
+  width: 90%;
   border: solid;
   background-color: bisque;
   border-radius: 20px;
