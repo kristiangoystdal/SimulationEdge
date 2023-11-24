@@ -91,24 +91,29 @@ export default {
         this.activeVideoIndex = null;
       }
     },
-    async checkPrivateVideos(userId) {
+    async checkPrivateVideos(user) {
       try {
-        // Assuming you have a node named 'userPrivateVids' with user-specific private video names
-        console.log(userId)
-        const privateVidsRef = ref(db, `usersPrivateVids`);
+        if(user){
+          // Assuming you have a node named 'userPrivateVids' with user-specific private video names
+          const privateVidsRef = ref(db, `usersPrivateVids`);
 
-        onValue(privateVidsRef, (snapshot) => {
-          const allowedVideoNames = snapshot.val() || {};
+          onValue(privateVidsRef, (snapshot) => {
+            const allowedVideoNames = snapshot.val() || {};
 
-          // Check if the specific key (tempID) exists in the snapshot
-          if (allowedVideoNames[userId]) {
-            // If the key exists, show all videos (private and non-private)
-            this.slideData = this.slideData;
-          } else {
-            // If the key doesn't exist, filter out all private videos
-            this.slideData = this.slideData.filter((video) => !video.private);
-          }
-        });
+            // Check if the specific key (user) exists in the snapshot
+            if (allowedVideoNames[user.uid]) {
+              // If the key exists, show all videos (private and non-private)
+              this.slideData = this.slideData;
+            } else {
+              // If the key doesn't exist, filter out all private videos
+              this.slideData = this.slideData.filter((video) => !video.private);
+            }
+          });
+        }
+        else{
+          this.slideData = this.slideData.filter((video) => !video.private);
+        }
+        
       } catch (error) {
         console.error('Error checking private videos:', error);
       }
@@ -116,9 +121,7 @@ export default {
   },
   created() {
     auth.onAuthStateChanged((user) => {
-      if (user) {
-        this.checkPrivateVideos(user.uid);
-      }
+      this.checkPrivateVideos(user);
     });
   },
 };
