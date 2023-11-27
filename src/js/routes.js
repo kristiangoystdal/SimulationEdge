@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { isAuthenticated } from './firebase.js';
+import { getAuth, onAuthStateChanged} from "firebase/auth"
+
 
 // Import page components
 import StartPage from '../pages/main/StartPage.vue';
@@ -33,17 +35,26 @@ const router = createRouter({
   routes,
 });
 
-// Route Guard to protect routes that require authentication
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!isAuthenticated()) {
-      next({ name: 'home' }) // Redirect to home if not authenticated
+    const isAuthenticated = await checkAuthentication();
+    if (!isAuthenticated) {
+      next({ name: 'home' }); // Redirect to home if not authenticated
     } else {
-      next() // Proceed to the requested route if authenticated
+      next(); // Proceed to the requested route if authenticated
     }
   } else {
-    next() // For routes that don't require authentication, proceed as usual
+    next(); // For routes that don't require authentication, proceed as usual
   }
 });
+
+async function checkAuthentication() {
+  return new Promise((resolve) => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      resolve(!!user);
+    });
+  });
+}
 
 export default router;

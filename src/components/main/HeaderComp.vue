@@ -1,41 +1,50 @@
 <template v-slot:header>
     <header>
-        <div class="logo">
-            <a href="/" target="_top">
-                <img src="../../assets/photos/Logo_siden.png" alt="Logo" target="_top" href='/'>
-            </a>
+      <div class="logo">
+        <a href="/" target="_top">
+          <img src="../../assets/photos/Logo_siden.png" alt="Logo" target="_top" @load="imageLoaded('logo')" href='/' />
+        </a>
+      </div>
+      <div v-if="isScreenWideEnough">
+        <nav>
+          <ul class="nav-menu">
+            <li v-for="item in menu" :key="item.name">
+              <router-link v-if="!item.hasOwnProperty('userState')" class="menuItem" :to="item.url">{{ item.name }}</router-link>
+              <div v-else>
+                <template v-if="loadingUser"> <!-- Show loading indicator while user data is loading -->
+                  <div class="menuItem">Loading...</div>
+                </template>
+                <template v-else>
+                  <router-link v-if="!user" class="menuItem" to="/login">Login/Register</router-link>
+                  <router-link v-if="user" class="menuItem" to="/account">Account</router-link>
+                </template>
+              </div>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <div v-else>
+        <div id="menu-button">
+          <img src="../../assets/photos/Hamburger_icon.png" alt="Hamburger Icon" @click="toggleMenu" />
+          <div v-if="menuState" id="menu">
+            <li v-for="item in menu" :key="item.name">
+              <router-link v-if="!item.hasOwnProperty('userState')" class="menuItem" :to="item.url" @click="toggleMenu">{{ item.name }}</router-link>
+              <div v-else>
+                <template v-if="loadingUser"> <!-- Show loading indicator while user data is loading -->
+                  <div class="menuItem">Loading...</div>
+                </template>
+                <template v-else>
+                  <router-link v-if="!user" class="menuItem" to="/login" @click="toggleMenu">Login/Register</router-link>
+                  <router-link v-if="user" class="menuItem" to="/account" @click="toggleMenu">Account</router-link>
+                </template>
+              </div>
+            </li>
+            <v-icon icon="mdi-close" size="15vw" id="menuClose" @click="toggleMenu"></v-icon>
+          </div>
         </div>
-        <div v-if="isScreenWideEnough">
-            <nav>	
-                <ul class="nav-menu">
-                    <li v-for="item in menu" :key="item.name">
-                        <router-link v-if="!item.hasOwnProperty('userState')" class="menuItem" :to="item.url">{{ item.name }}</router-link>
-                        <div v-else>
-                            <router-link v-if="!user" class="menuItem" to="/login">Login/Register</router-link>
-                            <router-link v-if="user" class="menuItem" to="/account">Account</router-link>
-                        </div>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-        <div v-else>
-            <div id="menu-button">
-                <img src="../../assets/photos/Hamburger_icon.png" alt="Hamburger Icon" @click="toggleMenu">
-                <div v-if="menuState" id="menu">
-                    <li v-for="item in menu" :key="item.name">
-                        <router-link v-if="!item.hasOwnProperty('userState')" class="menuItem" :to="item.url" @click="toggleMenu">{{ item.name }}</router-link>
-                        <div v-else>
-                            <router-link v-if="!user" class="menuItem" to="/login" @click="toggleMenu">Login/Register</router-link>
-                            <router-link v-if="user" class="menuItem" to="/account" @click="toggleMenu">Account</router-link>
-                        </div>
-                    </li>
-                    <v-icon icon="mdi-close" size="15vw" id="menuClose" @click="toggleMenu"></v-icon>
-                </div>
-            </div>
-        </div>
-        
-    </header>        
-</template>
+      </div>
+    </header>
+  </template>
 
 <script>
   import { getAuth, onAuthStateChanged} from "firebase/auth"
@@ -62,6 +71,7 @@ export default {
             menuState: false,
             mobile: false,
             isScreenWideEnough: false,
+            loadingUser: true, // Added loadingUser state
         }
     },
     methods:{
@@ -70,14 +80,15 @@ export default {
             const auth = getAuth();
 
             onAuthStateChanged(auth, (user) => {
-            if (user) {
-                this.$emit('user', user);
-                this.setUser(user);
-            } 
-            else {
-                this.$emit('user', null);
-                this.setUser(null);
+                if (user) {
+                    this.$emit('user', user);
+                    this.setUser(user);
+                } else {
+                    this.$emit('user', null);
+                    this.setUser(null);
                 }
+                // Set loadingUser to false after user data is handled
+                this.loadingUser = false;
             });
         },
         checkScreenWidth() {
@@ -88,7 +99,22 @@ export default {
         },
     },
     created() {
+        const auth = getAuth();
+
+        // Load user from localStorage if available
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            // Parse the stored user data
+            const user = JSON.parse(storedUser);
+            // Set the user in your Vuex store or wherever you're managing your user state
+            this.setUser(user);
+            // Set loadingUser to false immediately
+            this.loadingUser = false;
+        }
+
+        // Continue with your existing code to observe authentication state changes
         this.observeAuthState();
+
         // Call the method to check screen width initially
         this.checkScreenWidth();
 
