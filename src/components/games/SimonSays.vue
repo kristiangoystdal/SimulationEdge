@@ -1,18 +1,32 @@
 <template>
     <TitleVue :title="pageTitle"></TitleVue>
-
-    <div id="lightBox">
-        <v-btn
-            v-for="(light, index) in lights"
-            :key="index"
-            :id="'light-' + (index + 1)"
-            :style="getLightStyle(light,index)"
-            @click="buttonPress(index)"
-            :class="{'disabledLight': currentlyBlinking || gameover,'light' : !currentlyBlinking && !gameover }"
-        >
-            {{ index + 1 }}
-        </v-btn>
+    <div id="box">
+        <div id="lightBox">
+            <v-btn
+                v-for="(light, index) in lights"
+                :key="index"
+                :id="'light-' + (index + 1)"
+                :style="getLightStyle(light,index)"
+                @click="buttonPress(index)"
+                :class="{'disabledLight': currentlyBlinking || gameover,'light' : !currentlyBlinking && !gameover }"
+            >
+                {{ index + 1 }}
+            </v-btn>
+        </div>
+        <div id="switchBox">
+            <v-switch
+                v-model="autoRound"
+                hide-details
+                inset
+                :label="`Auto run: ${autoRound}`"
+                true-value="On"
+                false-value="Off"
+                id="switch"
+            ></v-switch>
+        </div>
+        
     </div>
+    
 
     <HighscoreComp 
         :scoreTitle='scoreTitle' 
@@ -20,7 +34,7 @@
         :databasePath="dbPath" 
         :buttonFunction="blinkLights" 
         :buttonText="startText"
-        :buttonDisable="!currentlyPlaying || gameover"
+        :buttonDisable="!currentlyPlaying && (autoRound=='Off' || sequenceLength!=0) || gameover || (autoRound=='On' && sequenceLength==0) "
         :score="sequenceLength-1"
         :scoreLabel="label"
         :sortWay="hightoLow"
@@ -62,6 +76,7 @@ export default {
             scoreTitle: "Score",
             label: "",
             hightoLow: false,
+            autoRound: "Off",
         };
     },
     components: {
@@ -70,11 +85,11 @@ export default {
     },
     computed:{
         blinkDuration() {
-            if(this.sequenceLength>8){
-                return 500
+            if(this.sequenceLength>12){
+                return 300
             }
             else{
-                return 700-(25*(this.sequenceLength-1));
+                return 600-(25*(this.sequenceLength-1));
             }
         },
         user() {
@@ -91,8 +106,12 @@ export default {
     },
     methods: {
         async blinkLights() {
+            await new Promise(resolve => setTimeout(resolve, 200));
             if(this.gameover){
                 this.reset()
+                if(this.autoRound=="On"){
+                    this.blinkLights();
+                }
             }
             else{
                 this.currentlyBlinking= true;
@@ -127,6 +146,9 @@ export default {
                         this.sequenceLength++;
                         this.currentlyPlaying=false;
                         this.currentlyBlinking=true;
+                        if(this.autoRound=="On"){
+                            this.blinkLights();
+                        }
                     }
                 }
                 else{
@@ -247,15 +269,29 @@ export default {
 
 <style scoped>
 @media (min-width: 769px) {
+    #box{
+        max-width: 1200px;
+        width: 90%;
+        border: solid;
+        margin: auto;
+        background-color:bisque;
+        border-radius: 20px;
+    }
     #lightBox{
-      max-width: 1200px;
-      width: 90%;
-      border: solid;
-      margin: auto;
-      display: flex;
-      justify-content: center;
-      background-color:bisque;
-      border-radius: 20px;
+        display: flex;
+        justify-content: center;
+    }
+    #switchBox{
+        margin: auto;
+        width: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        justify-content: space-around;
+        /* border: solid; */
+    }
+    #switch{
+        width: auto;
     }
 
     .light, .disabledLight {
