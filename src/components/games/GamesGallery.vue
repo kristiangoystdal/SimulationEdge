@@ -26,8 +26,8 @@
           </div>
           <div class="gridItem">
             <router-link to="/games" class="game-item">
-              <img src="../../assets/photos/coming_soon.png" alt="Game" class="round-image">
-              <span class="under-text">Flappy Bird</span>
+              <img src="../../assets/photos/FlappyBook.gif" alt="Game" class="round-image">
+              <span class="under-text">Flappy Book</span>
             </router-link>
           </div>
         </div>
