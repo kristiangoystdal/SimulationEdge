@@ -137,7 +137,7 @@ export default {
 }
 
 #gallery {
-  max-width: 900px;
+  max-width: 1200px;
   width: 90%;
   height: auto;
   margin: auto;
@@ -153,8 +153,10 @@ video {
 @media (min-width: 769px) {
   #videoName{
     text-align: center;
-    font-size: 2vw;
+    font-size: 1.6vw;
     padding-bottom: 5vw;
+    font-family: "Titlefont";
+    font-style: oblique;
   }
 }
 
