@@ -1,19 +1,20 @@
 
 <template>
-    <v-footer class="custom-footer">
+    <v-footer class="custom-footer" style="height: auto;">
       <v-row justify="center" no-gutters>
         <v-btn
           v-for="link in links"
           :key="link"
+          :to="link.path"
           color="white"
           variant="text"
           class="mx-2"
           rounded="xl"
         >
-          {{ link }}
+          {{ link.name }}
         </v-btn>
         <v-col class="text-center mt-4" cols="12">
-          {{ new Date().getFullYear() }} — <strong>Vuetify</strong>
+          &copy; {{ new Date().getFullYear() }} — <strong>Simulation Edge</strong>
         </v-col>
       </v-row>
     </v-footer>
@@ -23,12 +24,9 @@
     export default {
       data: () => ({
         links: [
-          'Home',
-          'About Us',
-          'Team',
-          'Services',
-          'Blog',
-          'Contact Us',
+          { path: '/', name: "Home"},
+          { path: '/games', name: "Games"},
+          { path: '/videos', name: "Videos"},
         ],
       }),
     }
