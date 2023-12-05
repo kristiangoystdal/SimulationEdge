@@ -1,51 +1,73 @@
 <template>
-  <div id="content">
-    <Header ></Header>   
-    <div id="router">
-      <router-view></router-view> 
-    </div>
-    <!-- <Footer></Footer> -->
-  </div>
-  
+  <v-app ref="appRef">
+    <Header ref="headerRef"></Header>
+
+    <v-main>
+      <div id="content" :style="{ minHeight: calcContentHeight}">
+        <router-view></router-view>
+      </div>
+    </v-main>
+
+    <Footer ref="footerRef"></Footer>
+  </v-app>
 </template>
 
 <script>
-  import Header from "./components/main/HeaderComp.vue"
-  import Footer from "./components/main/Footer.vue"
-  
-  export default {
-    name: 'App',
-    data(){
-      return{
-        currUser: null
-      }
+import Header from "./components/main/HeaderComp.vue";
+import Footer from "./components/main/Footer.vue";
+
+export default {
+  name: "App",
+  data() {
+    return {
+      currUser: null,
+      headerHeight: 0,
+      footerHeight: 0,
+    };
+  },
+  components: {
+    Header,
+    Footer,
+  },
+  computed: {
+    calcContentHeight() {
+      return `calc(100vh - ${this.headerHeight + this.footerHeight}px)`;
     },
-    components: {
-      Header, Footer
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.headerHeight = this.$refs.headerRef.$el.clientHeight;
+      this.footerHeight = this.$refs.footerRef.$el.clientHeight;
+    });
+    window.addEventListener("resize", this.updateHeights);
+  },
+  methods: {
+    updateHeights() {
+      this.headerHeight = this.$refs.headerRef.$el.clientHeight;
+      this.footerHeight = this.$refs.footerRef.$el.clientHeight;
     },
-  }
+  },
+  beforeDestroy() {
+    window.removeEventListener("resize", this.updateHeights);
+  },
+};
 </script>
 
-<style >
-  html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background-image: url('./assets/photos/bigger-gradient.png');
-    background-repeat: repeat-y; /* Repeat the image vertically */
-    background-size:auto;
-  }
-
+<style scoped>
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 
 #content {
-  position: relative;
-  z-index: 1;
+  height: 100%;
+  background-image: url('./assets/photos/bigger-gradient.png');
+  background-repeat: repeat-y;
+  background-size: auto;
+  display: flex;
+  flex-direction: column;
+  top: 0;
 }
-
-Footer {
-  position: relative;
-  z-index: 2;
-}
-
 
 </style>

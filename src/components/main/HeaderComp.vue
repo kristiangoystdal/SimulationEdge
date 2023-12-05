@@ -2,7 +2,7 @@
     <header>
       <div class="logo">
         <a href="/" target="_top">
-          <img src="../../assets/photos/Logo_siden.png" alt="Logo" target="_top" @load="imageLoaded('logo')" href='/' />
+          <img src="../../assets/photos/Logo_siden.png" alt="Logo" target="_top" href='/' />
         </a>
       </div>
       <div v-if="isScreenWideEnough">
@@ -150,6 +150,8 @@ export default {
             top: 0;
             padding: 0;
             margin: 0;
+            background-color: #6d4ff8;
+            border-bottom: solid;
         }
         
         .logo{
@@ -230,6 +232,8 @@ export default {
             top: 0;
             padding: 0;
             margin: 0;
+            background-color: #6d4ff8;
+            border-bottom: solid;
         }
         
         .logo{

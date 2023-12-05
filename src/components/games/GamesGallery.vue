@@ -1,33 +1,29 @@
 <template>
     <div>
-      <div class="title-box">
-        <h2>Our Games</h2>
-      </div>
-  
+      <TitleVue :title='pageTitle'></TitleVue>
+      
       <div class="container">
         <div class="grid">
-          <div class="gridItem">
-            <router-link to="/games/gaming-central" class="game-item">
-              <img src="../../assets/photos/Gaming_Central_Logo.png" alt="Game" class="round-image">
-              <span class="under-text">Gaming Central</span>
+          <div v-for="(game,i) in publishedGames">
+            <router-link :to="game.url" class="game-item">
+              <img :src="game.logo" alt="Game" class="round-image">
+              <span class="under-text">{{game.name}}</span>
             </router-link>
           </div>
-          <div class="gridItem">
-            <router-link to="/games/the-alphabet-game" class="game-item">
-              <img src="../../assets/photos/Type_the_Alphabet.png" alt="Game" class="round-image">
-              <span class="under-text">The Alphabet Game</span>
-            </router-link>
-          </div>
-          <div class="gridItem">
-            <router-link to="/games/simon-says" class="game-item">
-              <img src="../../assets/photos/SimonSaysLogo.png" alt="Game" class="round-image">
-              <span class="under-text">Simon Says</span>
-            </router-link>
-          </div>
-          <div class="gridItem">
-            <router-link to="/games" class="game-item">
-              <img src="../../assets/photos/FlappyBook.gif" alt="Game" class="round-image">
-              <span class="under-text">Flappy Book</span>
+        </div>
+      </div>
+
+      <br><br><br><br>
+      
+      <div class="title-box">
+        <h4>Coming Soon</h4>
+      </div>
+      <div class="container">
+        <div class="grid" :style="{ gridTemplateColumns: gridColumns }">
+          <div v-for="(game, i) in ComingSoonGames" :key="i" class="grid-item">
+            <router-link :to="game.url" class="game-item">
+              <img :src="game.logo" alt="Game" class="round-image">
+              <span class="under-text">{{game.name}}</span>
             </router-link>
           </div>
         </div>
@@ -36,128 +32,139 @@
   </template>
   
   <script>
+  import TitleVue from '../extra/Title.vue';
+
+  import Gaming_Central_Logo from '../../assets/photos/Gaming_Central_Logo.png'
+  import Alphabet_Game_Logo from '../../assets/photos/Type_the_Alphabet.png'
+  import Simon_Says_Logo from '../../assets/photos/SimonSaysLogo.png'
+  import FlappyBook_Logo from '../../assets/photos/FlappyBook.gif'
+  
+
     export default{
-      name: "GamesGallery"
+      name: "GamesGallery",
+      components: {
+        TitleVue
+      },
+      data() {
+        const publishedGames = [
+          { name: 'Gaming Central', url: "games/gaming-central", logo: Gaming_Central_Logo},
+          { name: 'The Alphabet Game', url: "games/the-alphabet-game", logo: Alphabet_Game_Logo},
+          { name: 'Simon Says', url: "games/simon-says", logo: Simon_Says_Logo},
+        ];
+        const ComingSoonGames = [
+          { name: 'Flappy Book', url: "games/flappy-book", logo: FlappyBook_Logo},
+        ];
+
+        return {
+          pageTitle: 'Videos',
+          publishedGames: publishedGames,
+          ComingSoonGames: ComingSoonGames,
+          activeVideoIndex: null,
+          pageTitle: "Games",
+
+        };
+      },
+      computed: {
+        gridColumns() {
+          if (this.isMobile) {
+            return 'auto'; // or any other style suitable for mobile layout
+          } else {
+            if (this.ComingSoonGames.length > 2) {
+              return `repeat(3, 1fr)`;
+            } else {
+              return `repeat(${this.ComingSoonGames.length}, 1fr)`;
+            }
+          }
+        },
+        isMobile() {
+          // Use your preferred method to check if the device is mobile
+          return window.innerWidth <= 768; // Example: consider devices with width 768px or less as mobile
+        },
+      },
     }
   </script>
   
-  <style scoped>
-    @media (min-width: 769px){
-      .title-box {
-        text-align: center;
-        align-items: center;
-        font-size: 3vw;
-        text-decoration: underline;
-        font-family: 'TitleFont', sans-serif;
-        margin-top: 3vw;
-      }
+<style scoped>
 
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        justify-items: center;
-        gap: 7vw;
-        margin-top: 2vw;
-      }
+  .title-box {
+    text-align: center;
+    font-family: 'TitleFont', sans-serif;
+    /* text-decoration: underline; */
+    margin-top: 3vw;
+    font-size: 2vw;
 
-      .round-image {
-        border-radius: 50%;
-        width: 15vw;
-        height: auto;
-        padding: 1vw;
-      }
-
-      .under-text {
-        color: black;
-        text-decoration: none;
-        font-size: 2vw;
-        text-align: center;
-        font-family: 'TitleFont', sans-serif;
-        color: white;
-      }
-
-      .container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        margin-top: 2vw;
-      }
-
-      .game-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          text-decoration: none;
-          color: inherit;
-          
-      }
-
-      @font-face {
-          font-family: 'TitleFont';
-          src: url('../assets/fonts/FredokaOne-Regular.ttf') format('truetype');
-      }
-    }
-
-    @media (max-width: 768px){
-      .title-box {
-        text-align: center;
-        align-items: center;
-        font-size: 6vw;
-        text-decoration: underline;
-        font-family: 'TitleFont', sans-serif;
-        margin-top: 7vw;
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(1, 1fr);
-        justify-items: center;
-        gap: 7vw;
-        margin-top: 2vw;
-      }
-
-      .round-image {
-        border-radius: 50%;
-        width: 50vw;
-        height: auto;
-        padding: 1vw;
-      }
-
-      .under-text {
-        color: black;
-        text-decoration: none;
-        font-size: 5vw;
-        text-align: center;
-        font-family: 'TitleFont', sans-serif;
-        color: white;
-      }
-
-      .container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        margin-top: 5vw;
-      }
-
-      .game-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          text-decoration: none;
-          color: inherit;
-          
-      }
-
-      @font-face {
-          font-family: 'TitleFont';
-          src: url('../assets/fonts/FredokaOne-Regular.ttf') format('truetype');
-      }
+  }
+  
+  .grid {
+    display: grid;
+    gap: 7vw;
+    margin-top: 2vw;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .round-image {
+    border-radius: 50%;
+    width: 15vw;
+    height: auto;
+    padding: 1vw;
+  }
+  
+  .under-text {
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    font-family: 'TitleFont', sans-serif;
+    font-size: 2vw;
+  }
+  
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 2vw;
+  }
+  
+  .game-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-decoration: none;
+  }
+  
+  @font-face {
+    font-family: 'TitleFont';
+    src: url('../assets/fonts/FredokaOne-Regular.ttf') format('truetype');
+  }
+  
+  #coming-soon-title {
+    font-size: 2vw;
+  }
+  
+  @media (max-width: 768px) {
+    .title-box {
+      font-size: 6vw;
+      margin-top: 7vw;
     }
   
-</style>
+    .grid {
+      grid-template-columns: repeat(1, 1fr);
+    }
+  
+    .round-image {
+      width: 50vw;
+    }
+  
+    .under-text {
+      font-size: 5vw;
+    }
+  
+    .container {
+      margin-top: 5vw;
+    }
+  }
+  
+  </style>
+  
