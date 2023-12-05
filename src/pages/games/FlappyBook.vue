@@ -1,16 +1,16 @@
 <template>
-    <FlappyBird></FlappyBird>
+    <FlappyBook></FlappyBook>
     <!-- <HighscoreComp></HighscoreComp> -->
 </template>
     
 <script>
-    import FlappyBird from '../../components/games/FlappyBird.vue'
+    import FlappyBook from '../../components/games/FlappyBook.vue'
     // import HighscoreComp from '../../components/HighscoreComp.vue'
 
     export default{
         name: "FlappyBirdPage", 
         components: {
-            FlappyBird, 
+            FlappyBook, 
             // HighscoreComp,
         }
     }
