@@ -1,10 +1,6 @@
 <template>
     <div>
       <TitleVue :title='pageTitle'></TitleVue>
-
-      <!-- <div class="title-box">
-        <h2>Our Games</h2>
-      </div> -->
       
       <div class="container">
         <div class="grid">
@@ -17,23 +13,21 @@
         </div>
       </div>
 
-<br><br><br><br>
+      <br><br><br><br>
+      
       <div class="title-box">
         <h4>Coming Soon</h4>
       </div>
       <div class="container">
         <div class="grid" :style="{ gridTemplateColumns: gridColumns }">
           <div v-for="(game, i) in ComingSoonGames" :key="i" class="grid-item">
-            <router-link to="games" class="game-item">
+            <router-link :to="game.url" class="game-item">
               <img :src="game.logo" alt="Game" class="round-image">
               <span class="under-text">{{game.name}}</span>
             </router-link>
           </div>
         </div>
       </div>
-
-
-  
     </div>
   </template>
   
