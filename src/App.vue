@@ -1,14 +1,14 @@
 <template>
-  <v-app>
-    <Header></Header>
+  <v-app ref="appRef">
+    <Header ref="headerRef"></Header>
 
     <v-main>
-      <div id="content">
+      <div id="content" :style="{ minHeight: calcContentHeight}">
         <router-view></router-view>
       </div>
     </v-main>
 
-    <Footer></Footer>
+    <Footer ref="footerRef"></Footer>
   </v-app>
 </template>
 
@@ -21,11 +21,34 @@ export default {
   data() {
     return {
       currUser: null,
+      headerHeight: 0,
+      footerHeight: 0,
     };
   },
   components: {
     Header,
     Footer,
+  },
+  computed: {
+    calcContentHeight() {
+      return `calc(100vh - ${this.headerHeight + this.footerHeight}px)`;
+    },
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.headerHeight = this.$refs.headerRef.$el.clientHeight;
+      this.footerHeight = this.$refs.footerRef.$el.clientHeight;
+    });
+    window.addEventListener("resize", this.updateHeights);
+  },
+  methods: {
+    updateHeights() {
+      this.headerHeight = this.$refs.headerRef.$el.clientHeight;
+      this.footerHeight = this.$refs.footerRef.$el.clientHeight;
+    },
+  },
+  beforeDestroy() {
+    window.removeEventListener("resize", this.updateHeights);
   },
 };
 </script>
@@ -38,17 +61,13 @@ html, body {
 }
 
 #content {
-  height: 100%; /* Make sure #content takes up the full height of the viewport */
+  height: 100%;
   background-image: url('./assets/photos/bigger-gradient.png');
-  background-repeat: repeat-y; /* Repeat the image vertically */
+  background-repeat: repeat-y;
   background-size: auto;
   display: flex;
   flex-direction: column;
-  
+  top: 0;
 }
 
-Footer {
-  position: relative;
-  z-index: 2;
-}
 </style>
