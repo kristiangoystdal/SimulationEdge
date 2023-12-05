@@ -1,19 +1,23 @@
 <template>
     <TitleVue :title='pageTitle'></TitleVue>
+    <Countdown :countdownDate="date"></Countdown>
 </template>
 
 <script>
     import TitleVue from '../extra/Title.vue';
+    import Countdown from '../extra/Countdown.vue';
 
     export default {
         name: 'Basefile',
         data() {
             return {
-                pageTitle: "Flappy Bird"
+                pageTitle: "Flappy Bird",
+                date: "2023-12-24T12:00:00"
             };
         },
         components: {
-            TitleVue
+            TitleVue,
+            Countdown,
         },
     }
 </script>
