@@ -14,15 +14,17 @@
             </v-btn>
         </div>
         <div id="switchBox">
-            <v-switch
+            <div id="switch">
+                <v-switch
                 v-model="autoRound"
                 hide-details
                 inset
                 :label="`Auto run: ${autoRound}`"
                 true-value="On"
                 false-value="Off"
-                id="switch"
             ></v-switch>
+            </div>
+            
         </div>
         
     </div>
@@ -268,6 +270,7 @@ export default {
 </script>
 
 <style scoped>
+
 @media (min-width: 769px) {
     #box{
         max-width: 1200px;
@@ -283,15 +286,17 @@ export default {
     }
     #switchBox{
         margin: auto;
-        width: 50%;
+        width: auto;
         display: flex;
-        justify-content: center;
         align-items: center;
         justify-content: space-around;
         /* border: solid; */
     }
     #switch{
         width: auto;
+        margin: auto;
+        /* border: solid; */
+        align-self: center;
     }
 
     .light, .disabledLight {
@@ -335,6 +340,23 @@ export default {
     }
     .light{
         background-color: #ffffff;
+    }
+
+    #switchBox{
+        margin: 2vw auto auto auto;
+        width: 90%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        justify-content: center;
+        border: solid;
+        border-radius: 20px;
+        background-color: bisque;
+        padding: 1vw 0;
+    }
+    #switch{
+        width: auto;
+        margin: auto;
     }
 }
 </style>
