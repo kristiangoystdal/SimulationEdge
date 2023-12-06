@@ -17,6 +17,7 @@
   </template>
   
   <script>
+  // Imports countdown function from countdown.js
   import countdown from "../../js/countdown.js";
   
   export default {
@@ -34,6 +35,7 @@
           minutes: 0,
           seconds: 0,
         },
+        // Values from countdown function that are not needed
         excludedData: [
           "start",
           "end",
@@ -42,28 +44,54 @@
           "toString",
           "toHTML",
           "addTo"
-        ]
+        ],
+        countdownDone: false,
       };
     },
     methods: {
+      // Function to update the timer values
       updateTimer() {
+
+        // Current time and goal time
         const now = new Date();
         const endDate = new Date(this.countdownDate);
-  
-        const result = countdown(now, endDate, countdown.DEFAULTS);
-  
-        // Update countdownValues with the result
-        for (const unit in result) {
-          if (result.hasOwnProperty(unit) && !this.excludedData.includes(unit)) {
-            this.countdownValues[unit] = result[unit];
+
+        // Checks if we have passed the end date or not
+        if (now > endDate) {
+          // Set all values to zero
+          this.countdownValues = {
+            years: 0,
+            months: 0,
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0,
+          };
+          this.countdownDone = true;
+          clearInterval(this.timerInterval); // Stops the interval loop
+          return; // Stops further execution
+        }
+
+        // Updates the values if end date is in the future
+        else{
+          // The difference from now 
+          const result = countdown(now, endDate, countdown.DEFAULTS);
+    
+          // Update countdownValues with the result. excluding the keys listed in 'excludedData'
+          for (const unit in result) {
+            if (result.hasOwnProperty(unit) && !this.excludedData.includes(unit)) {
+              this.countdownValues[unit] = result[unit];
+            }
           }
         }
       },
     },
     mounted() {
-      // Update the timer every second
+      // Updates the timer every second
       this.updateTimer();
-      this.timerInterval = setInterval(this.updateTimer, 1000);
+      this.timerInterval = setInterval(() => {
+        this.updateTimer();
+      }, 1000); 
     },
     beforeDestroy() {
       // Clear the interval when the component is destroyed
@@ -71,8 +99,10 @@
     },
   };
   </script>
-  
-  <style scoped>
+
+
+<style scoped>
+  /* Styles for the Countdown Component */
   @font-face {
     font-family: 'TitleFont';
     font-display: auto;
@@ -92,7 +122,6 @@
     background-color: bisque;
     border-radius: 20px;
     border: solid;
-    margin-bottom: 10vw; 
   }
 
   #title {
@@ -125,6 +154,9 @@
     #countdown {
       grid-template-columns: repeat(auto-fill, minmax(15%, 1fr));
     }
+    #box{
+      margin-bottom: 10vw;
+    }
   }
 
   @media (max-width: 768px) {
@@ -141,6 +173,9 @@
       font-size: 5vw;
       font-family: 'TitleFont', sans-serif;
       padding-top: 3vw;
+    }
+    #box{
+      margin-bottom: 2vw;
     }
   }
 </style>
