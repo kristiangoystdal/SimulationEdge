@@ -83,7 +83,7 @@
 
   #box {
     margin: 2vw auto;
-    max-width: 700px;
+    max-width: 1200px;
     width: 90%;
     height: auto;
     right: 0;
@@ -91,7 +91,8 @@
     padding: 2vw 0;
     background-color: bisque;
     border-radius: 20px;
-    border: solid; 
+    border: solid;
+    margin-bottom: 10vw; 
   }
 
   #title {
@@ -104,13 +105,13 @@
   #countdown {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(30%, 1fr));
-    gap: 1vw;
+    gap: 2%;
     justify-content: space-evenly;
   }
 
   .value-box {
     text-align: center;
-    padding: 0.5vw;
+    padding: 0;
   }
 
   @media (min-width: 769px) {
@@ -121,7 +122,6 @@
       padding-bottom: 3vw;
       padding-top: 3vw; 
     }
-
     #countdown {
       grid-template-columns: repeat(auto-fill, minmax(15%, 1fr));
     }
