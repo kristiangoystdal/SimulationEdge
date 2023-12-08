@@ -11,7 +11,7 @@
         name: 'Basefile',
         data() {
             return {
-                pageTitle: "Flappy Bird",
+                pageTitle: "Flappy Book",
                 date: "2023-12-24T12:00:00"
             };
         },

@@ -27,6 +27,13 @@ const vuetify = createVuetify({
   directives,  
 })
 
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { fab } from '@fortawesome/free-brands-svg-icons';
+
+library.add(fab);
+
+
 // Create Vue app
 const app = createApp(App);
 
@@ -34,6 +41,8 @@ const app = createApp(App);
 app.use(router);
 app.use(store);
 app.use(vuetify);
+app.component('font-awesome-icon', FontAwesomeIcon);
+
 
 // Mount the app
 app.mount('#app');

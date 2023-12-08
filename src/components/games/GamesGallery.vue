@@ -56,7 +56,6 @@
         ];
 
         return {
-          pageTitle: 'Videos',
           publishedGames: publishedGames,
           ComingSoonGames: ComingSoonGames,
           activeVideoIndex: null,

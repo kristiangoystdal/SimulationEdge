@@ -106,7 +106,10 @@
             const diff = (now - this.startTime) / 1000;
             this.timer = diff;
           }
-        }, 1);
+          if(!this.done){
+            this.checkWin();
+          }
+        }, 10);
       },
       stopTimer() {
         clearInterval(this.intervalId);
@@ -268,19 +271,6 @@
             }
           }
         });  
-      },
-      insertRandomValues() {
-        for (let i = 0; i < 20; i++) {
-          const randomFloat = Math.random();
-          const path = randomFloat.toString().replace(/\./g, '');
-          const topPath = `/games/alphabetgame/highscores/` + path;
-
-          set(ref(db, topPath), randomFloat).then(() => {
-            // Data added successfully
-          }).catch((error) => {
-            console.error('Error adding data:', error);
-          });
-        }
       },
       reset() {
         this.input = "";
