@@ -1,5 +1,5 @@
 <template v-slot:header>
-    <header>
+    <header :style="{ backgroundColor: currentRoute === '/' ? 'rgba(0, 0, 0, 0)' : '#6d49f6' }">
       <div class="logo">
         <a href="/" target="_top">
           <img src="../../assets/photos/Logo_siden.png" alt="Logo" target="_top" href='/' />
@@ -129,6 +129,9 @@ export default {
         user() {
             return this.$store.getters.getCurrUser;
         },
+        currentRoute() {
+            return this.$route.path;
+        },
         
     },
 }
@@ -142,6 +145,7 @@ export default {
             padding: 0;
         }
         header{
+            z-index: 2;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -150,8 +154,6 @@ export default {
             top: 0;
             padding: 0;
             margin: 0;
-            background-color: #6d4ff8;
-            border-bottom: solid;
         }
         
         .logo{

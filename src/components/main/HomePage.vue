@@ -12,6 +12,8 @@ export default {
 
 <style scoped>
 .startPic {
+  position: absolute;
+  z-index: 0;
   top: 0;
   right: 0;
   left: 0;

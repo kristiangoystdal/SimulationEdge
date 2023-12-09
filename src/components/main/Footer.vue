@@ -63,7 +63,7 @@
 
 <style scoped>
     .custom-footer {
-        background-color: #2f2d91dc; /* Your desired background color */
+        background-color: #381C69; /* Your desired background color */
     }
     #flex{
         display: flex;

@@ -27,7 +27,6 @@ const routes = [
   { path: '/games/the-alphabet-game', name: "the-alphabet-game", component: AlphabetGame },
   { path: '/games/simon-says', name: "simon-says", component: SimonSays },
   { path: '/games/flappy-book', name: "flappy-book", component: FlappyBook },
-  // { path: '/formulacentral', name: "formula-central", component: FormulaCentral },
 ];
 
 const router = createRouter({
