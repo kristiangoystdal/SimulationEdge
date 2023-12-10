@@ -226,6 +226,7 @@ export default {
             padding: 0;
         }
         header{
+            z-index: 2;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -234,8 +235,6 @@ export default {
             top: 0;
             padding: 0;
             margin: 0;
-            background-color: #6d4ff8;
-            border-bottom: solid;
         }
         
         .logo{

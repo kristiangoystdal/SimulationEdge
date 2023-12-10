@@ -1,6 +1,6 @@
 <template>
 
-    <v-sheet class="sheet" style="max-width: 400px" id="center" rounded >
+    <v-sheet class="sheet" style="max-width: 400px; margin: 3vw auto;" id="center" rounded>
         <div id="login">Login</div>
 
         <v-form
@@ -58,17 +58,16 @@
         <div id="social">  
             <!-- Facebook login button -->
             <div class="social-signin_facebook" @click="signInWithFacebook">
-                <img src="../../assets/photos/facebook_logo-transparent.png" alt="facebook_logo">
+                <img src="../../assets/photos/facebook_logo-transparent.png" alt="facebook_logo" id="loginImg">
+                <div id="loginText">Sign in with Facebook</div>
             </div>
                 
             <!-- Google login button -->
             <div class="social-signin_google" @click="signInWithGoogle">
-                <img src="../../assets/photos/google_logo.png" alt="google_logo">
+                <img src="../../assets/photos/google_logo.png" alt="google_logo" id="loginImg">
+                <div id="loginText">Sign in with Google</div>
             </div>
-        </div>
-        
-        <!-- Registration link -->
-        
+        </div>        
     </v-sheet>
     
   </template>
@@ -209,6 +208,7 @@ div{
 .sheet{
     max-width: 400px;
     width: 90%;
+    margin-top: 200px;
 }
 
 
@@ -250,8 +250,10 @@ img{
         margin: auto;
         border-top: dashed;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        margin-bottom: 2vw;
     }
     .loginWith{
         display: none;
@@ -260,35 +262,41 @@ img{
         text-decoration: underline;
     }
 
-    .social-signin_facebook{
-        width: 20%;
+    .social-signin_facebook, .social-signin_google{
+        width: 70%;
         height: auto;
         margin: 2vw;
+        margin-bottom: 0;
         padding: 0.3vw;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-radius: 50%;
         border: solid;
-        background-color: #2f7af4;
         cursor: pointer;
+        border-radius: 10px;
     }
     .social-signin_google{
-        height: auto;
-        width: 20%;
-        margin: 2vw;
-        padding: 1vw;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-radius: 50%;
-        border: solid;
         background-color: white;
-        cursor: pointer;
+    }
+    .social-signin_facebook{
+        background-color: #2f7af4;
+    }
+    #loginImg{
+        width: 15%;
+        height: auto;
+        margin: 2%;
+    }
+    #loginText{
+        width: 85%;
+        height: auto;
+        margin-left: 5%;
+        margin-right: 5%;
+        font-size: auto;
+        font-family: 'TitleFont', sans-serif;
     }
 
     #link{
-        font-size: 1.4vw;
+        font-size: auto;
         text-align: center;
         height: auto;
         font-family: 'TitleFont', sans-serif;
@@ -330,6 +338,7 @@ img{
         margin: auto;
         border-top: dashed;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         padding-top: 5vw;
@@ -342,31 +351,37 @@ img{
         text-decoration: underline;
     }
 
-    .social-signin_facebook{
-        width: 25%;
+    .social-signin_facebook, .social-signin_google{
+        width: 80%;
         height: auto;
-        margin: 5vw;
-        padding: 0.7vw;
+        margin: 2vw;
+        margin-bottom: 0;
+        padding: 0.3vw;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-radius: 50%;
         border: solid;
-        background-color: #2f7af4;
         cursor: pointer;
+        border-radius: 10px;
     }
     .social-signin_google{
-        height: auto;
-        width: 25%;
-        margin: 5vw;
-        padding: 1vw;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-radius: 50%;
-        border: solid;
         background-color: white;
-        cursor: pointer;
+    }
+    .social-signin_facebook{
+        background-color: #2f7af4;
+    }
+    #loginImg{
+        width: 15%;
+        height: auto;
+        margin: 2%;
+    }
+    #loginText{
+        width: 85%;
+        height: auto;
+        margin-left: 5%;
+        /* margin-right: 5%; */
+        font-size: 5vw;
+        font-family: 'TitleFont', sans-serif;
     }
 
     #link{

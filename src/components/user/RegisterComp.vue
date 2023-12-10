@@ -1,6 +1,6 @@
 <template>
 
-    <v-sheet class="sheet" style="max-width: 400px" id="center" rounded >
+    <v-sheet class="sheet" style="max-width: 400px; margin: 3vw auto;" id="center" rounded >
         <div id="register">Register</div>
 
         <v-form
