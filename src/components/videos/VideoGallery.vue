@@ -50,6 +50,8 @@ import USAImage from '../../assets/photos/USA Roadtrip.png';
 import USAVideo from '../../assets/videos/USA.mp4';
 import LofotenImage from '../../assets/photos/Lofoten.png';
 import LofotenVideo from '../../assets/videos/Lofoten.mp4';
+import BrusselImage from '../../assets/photos/Brussel.jpg';
+import BrusselVideo from '../../assets/videos/Brussel.mov';
 
 export default {
   name: 'VideoGallery',
@@ -59,6 +61,7 @@ export default {
       { name: 'Trehyttetur', image: TrehytteImage, video: TrehytteVideo, private: false},
       { name: 'USA', image: USAImage, video: USAVideo, private: true},
       { name: 'Lofoten', image: LofotenImage, video: LofotenVideo, private: true},
+      { name: 'Brussel', image: BrusselImage, video: BrusselVideo, private: false},
     ];
 
     return {
