@@ -23,8 +23,8 @@
             <div v-for="colIndex in Array.from({ length: chosenLength }, (_, i) => i)" :key="colIndex">
                 <v-btn 
                     class="cell" 
-                    :disabled="!gameRunning ? true:false"
-                    @click="checkNeighbors(rowIndex,colIndex)"
+                    :disabled="!gameRunning ? true:false || this.buttonStateArray[rowIndex][colIndex]"
+                    @click="turn(rowIndex,colIndex)"
                 >
                     {{ mineArray[rowIndex][colIndex] }}
                 </v-btn>
@@ -42,6 +42,8 @@
 
 <script>
     import TitleVue from '../extra/Title.vue';
+
+    const waste = null
 
     export default {
         name: 'MineSweeper',
@@ -65,7 +67,9 @@
                 chosenLength: 9,
                 chosenMines: 10,
                 mineArray: null,
+                buttonStateArray: null, 
                 gameRunning: true,
+                gameOverState: false,
             };
         },
         computed:{
@@ -99,24 +103,31 @@
             },
             async arrayMaker(){
                 this.mineArray = null
-                let tempArray = []
+                this.buttonStateArray = null
+
+                const val1 = null;
+                const val2 = false;
+
+                let tempArray1 = []
+                let tempArray2 = []
                 for (let i = 0; i < this.chosenHeight; i++) {
-                    let row = [];
+                    let row1 = [];
+                    let row2 = [];
                     for (let j = 0; j < this.chosenLength; j++) {
-                    row.push(null);
+                    row1.push(val1);
+                    row2.push(val2);
                     }
-                    tempArray.push(row);
+                    tempArray1.push(row1);
+                    tempArray2.push(row2);
                 }
-                this.mineArray = tempArray;
+                this.mineArray = tempArray1;
+                this.buttonStateArray = tempArray2;
 
                 console.log(this.mineArray)
+                console.log(this.buttonStateArray)
             },
             clearArray(){
-                for (let i = 0; i < this.chosenHeight; i++) {
-                    for (let j = 0; j < this.chosenLength; j++) {
-                        this.mineArray[i][j] = null;
-                    }
-                }
+                this.arrayMaker();
             },
             minePlacer(){
                 this.clearArray();
@@ -162,7 +173,47 @@
                 }
 
                 console.log("Number of neighbors: " + neighbors)
+                return neighbors;
                 
+            },
+            turn(row, col) {
+                const gameState = this.CheckGameover(row, col);
+                if (!gameState) {
+                    const numberOfNeighbors = this.checkNeighbors(row, col);
+                    this.buttonStateArray[row][col] = true;
+
+                    // If there are no neighboring mines, call turn on each neighbor
+                    if (numberOfNeighbors === 0) {
+                        // Iterate through neighboring cells
+                        for (let i = -1; i <= 1; i++) {
+                            for (let j = -1; j <= 1; j++) {
+                                let newRow = row + i;
+                                let newCol = col + j;
+                                
+                                // Check if the neighbor is within bounds and not already revealed
+                                if (newRow >= 0 && newRow < this.mineArray.length &&
+                                    newCol >= 0 && newCol < this.mineArray[0].length &&
+                                    !this.buttonStateArray[newRow][newCol]) {
+                                    this.turn(newRow, newCol); // Recursively call turn on the neighbor
+                                }
+                            }
+                        }
+                    }
+                    else{
+                        this.mineArray[row][col] = numberOfNeighbors;
+                    }
+                } else {
+                    this.clearArray();
+                }
+            },
+            CheckGameover(row,col){
+                if(this.mineArray[row][col]==10){
+                    this.gameOverState = true; 
+                    return true;
+                }
+                else{
+                    return false;
+                }
             }
         },
     }
