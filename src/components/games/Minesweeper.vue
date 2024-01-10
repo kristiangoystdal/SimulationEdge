@@ -1,6 +1,6 @@
 <template>
     <TitleVue :title='pageTitle'></TitleVue>
-    <div id="difficultSelector" v-if="!gameRunning">
+    <div id="difficultSelector">
         Choose the difficulty:
         <div id="buttons">
             <v-btn @click="difficultySelector('easy')" :disabled="chosenDifficulty=='easy' ? true : false">
@@ -13,53 +13,79 @@
                 Hard
             </v-btn>
         </div>
-
-        {{ chosenMines }}
-        
     </div>
 
     <div id="gameboard">
         <div class="flex" v-for="rowIndex in Array.from({ length: chosenHeight }, (_, i) => i)" :key="rowIndex">
-            <div v-for="colIndex in Array.from({ length: chosenLength }, (_, i) => i)" :key="colIndex">
+            <div v-for="colIndex in Array.from({ length: chosenLength }, (_, i) => i)" :key="colIndex" 
+                @contextmenu.prevent="handleRightClick($event, rowIndex, colIndex)">
                 <v-btn 
                     class="cell" 
-                    :disabled="!gameRunning ? true:false || this.buttonStateArray[rowIndex][colIndex]"
+                    :disabled="this.buttonStateArray[rowIndex][colIndex]"
                     @click="turn(rowIndex,colIndex)"
+                    :id="chosenDifficulty === 'easy' ? 'easycell' : ''"
                 >
-                    {{ mineArray[rowIndex][colIndex] }}
+                    
+                    <div v-if="cellStateArray[rowIndex][colIndex] === 0">
+                        {{ mineArray[rowIndex][colIndex] }}
+                    </div>
+                    <font-awesome-icon :icon="['fas', 'flag']" v-if="cellStateArray[rowIndex][colIndex] === 1"></font-awesome-icon>
                 </v-btn>
             </div>
         </div>
     </div>
 
+   
+
+    <v-btn> {{ chosenMines }}</v-btn>
 
     <v-btn @click="minePlacer()">Place Mines</v-btn>
     <v-btn @click="clearArray()">Clear</v-btn>
     <v-btn @click="checkNeighbors(2,4)">Check</v-btn>
 
+    <HighscoreComp 
+        :scoreTitle='scoreTitle' 
+        :userScoresPath="userPath"
+        :databasePath="dbPath" 
+        :resetFunction="reset" 
+        :score="formattedTimer"
+        :scoreLabel="label"
+        :sortWay="highToLow"
+        :buttonDisable="resetButtonState"
+        :buttonText="resetButtonText"
+        :buttonFunction="reset"
+    >
+    </HighscoreComp>
 
 </template>
 
 <script>
     import TitleVue from '../extra/Title.vue';
+    import HighscoreComp from './HighscoreComp.vue';
+    import { getAuth, onAuthStateChanged } from "firebase/auth";
+    import { getDatabase, ref, onValue, set, remove, get} from 'firebase/database';   
+
+    const db = getDatabase();
+    const auth = getAuth();
 
     const waste = null
 
     export default {
         name: 'MineSweeper',
         components: {
-            TitleVue
+            TitleVue,
+            HighscoreComp
         },
         data() {
             return {
                 pageTitle: "MineSweeper",
                 easyHeight: 5,
-                easyLength: 9,
+                easyLength: 10,
                 easyMines: 10,
-                mediumHeight: 16,
+                mediumHeight: 12,
                 mediumLength: 16,
                 mediumMines: 40,
-                hardHeight: 16,
+                hardHeight: 12,
                 hardLength: 30,
                 hardMines: 99,
                 chosenDifficulty: "easy",
@@ -68,12 +94,29 @@
                 chosenMines: 10,
                 mineArray: null,
                 buttonStateArray: null, 
-                gameRunning: true,
+                gameRunning: false,
                 gameOverState: false,
+                cellStateArray: null,
+                startTime: null,
+                timer: 0,
+                intervalId: null,
+                done: false,
+                dbPath: "minesweeper",
+                userPath: "minesweepeScores",
+                scoreTitle: "Time",
+                label: "seconds",
+                highToLow: true,
+                resetButtonState:true,
+                resetButtonText: "Reset",
+                mobileInput: '',
+                consoleLog: '',
+                pressedKey: null,
             };
         },
         computed:{
-            
+            formattedTimer() {
+                return parseFloat(this.timer.toFixed(1));
+            },
         },
         created() {
             this.arrayMaker(); // Initialize the mineArray when component is created
@@ -104,27 +147,35 @@
             async arrayMaker(){
                 this.mineArray = null
                 this.buttonStateArray = null
+                this.cellStateArray = null
 
                 const val1 = null;
                 const val2 = false;
+                const val3 = null;
 
                 let tempArray1 = []
                 let tempArray2 = []
+                let tempArray3 = []
                 for (let i = 0; i < this.chosenHeight; i++) {
                     let row1 = [];
                     let row2 = [];
+                    let row3 = [];
                     for (let j = 0; j < this.chosenLength; j++) {
                     row1.push(val1);
                     row2.push(val2);
+                    row3.push(val3);
                     }
                     tempArray1.push(row1);
                     tempArray2.push(row2);
+                    tempArray3.push(row3);
                 }
                 this.mineArray = tempArray1;
                 this.buttonStateArray = tempArray2;
+                this.cellStateArray = tempArray3;
 
                 console.log(this.mineArray)
                 console.log(this.buttonStateArray)
+                console.log(this.cellStateArray)
             },
             clearArray(){
                 this.arrayMaker();
@@ -137,6 +188,8 @@
                     const randomCol = Math.floor(Math.random() * this.chosenLength);
                     if(this.mineArray[randomRow][randomCol]==null){
                         this.mineArray[randomRow][randomCol]=10
+                        this.cellStateArray[randomRow][randomCol]=0
+
                     }
                     else{
                         i-=1;
@@ -176,8 +229,27 @@
                 return neighbors;
                 
             },
+            handleRightClick(event, rowIndex, colIndex) {
+                event.preventDefault();  // Call this first
+
+                console.log('Right-click detected on row:', rowIndex, 'col:', colIndex);
+                if (!this.buttonStateArray[rowIndex][colIndex]) {
+                    this.cellStateArray[rowIndex][colIndex] += 1;
+                    if (this.cellStateArray[rowIndex][colIndex] == 2) {
+                    this.cellStateArray[rowIndex][colIndex] = 0;
+                    }
+                } else {
+                    console.log('Right-click not possible on row:', rowIndex, 'col:', colIndex);
+                }
+            },
+
             turn(row, col) {
+                if(!this.gameRunning){
+                    this.gameRunning=true;
+                    this.startTimer();
+                }
                 const gameState = this.CheckGameover(row, col);
+                this.cellStateArray[row][col]=0
                 if (!gameState) {
                     const numberOfNeighbors = this.checkNeighbors(row, col);
                     this.buttonStateArray[row][col] = true;
@@ -214,6 +286,32 @@
                 else{
                     return false;
                 }
+            },
+            startTimer() {
+                this.startTime = new Date();
+                this.intervalId = setInterval(() => {
+                if (this.startTime) {
+                    const now = new Date();
+                    const diff = (now - this.startTime) / 1000;
+                    this.timer = diff;
+                }
+                if(!this.done){
+                    // this.checkWin();
+                }
+                }, 10);
+            },
+            stopTimer() {
+                clearInterval(this.intervalId);
+            },
+            reset(){
+                this.startTime = null;
+                this.timer = null;
+                this.gameRunning = false;
+                this.gameOverState = false;
+                this.buttonStateArray = null;
+                this.cellStateArray = null;
+                this.mineArray = null;
+                this.arrayMaker();
             }
         },
     }
@@ -224,6 +322,7 @@
 #difficultSelector{
     border: solid;
     margin: 0 auto;
+    margin-bottom: 0;
     text-align: center;
     width: 20%;
 }
@@ -235,6 +334,7 @@
 
 #gameboard{
     margin: 2vw auto;
+    margin-top: 0;
     border: solid;
 }
 .flex{
@@ -245,10 +345,19 @@
 .cell {
     width: 30px !important;
     height: 30px !important;
-    min-width: 30px !important; /* To override Vuetify's minimum width */
-    line-height: 30px !important; /* Adjust line height if needed */
+    min-width: 20px !important; /* To override Vuetify's minimum width */
+    line-height: 20px !important; /* Adjust line height if needed */
     padding: 0 !important; /* Remove padding to maintain the size */
 }
+
+#easycell{
+    width: 72px!important;
+    height: 72px!important;
+    min-width: 20px!important; /* To override Vuetify's minimum width */
+    line-height: 20px!important; /* Adjust line height if needed */
+    padding: 0!important; /* Remove padding to maintain the size */
+}
+
 
     @media (min-width: 769px) {
 
