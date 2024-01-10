@@ -38,6 +38,7 @@
   import Alphabet_Game_Logo from '../../assets/photos/Type_the_Alphabet.png'
   import Simon_Says_Logo from '../../assets/photos/SimonSaysLogo.png'
   import FlappyBook_Logo from '../../assets/photos/FlappyBook.gif'
+  import MineSweeper_Logo from '../../assets/photos/minesweeperLogo.png'
   
 
     export default{
@@ -53,6 +54,7 @@
         ];
         const ComingSoonGames = [
           { name: 'Flappy Book', url: "games/flappy-book", logo: FlappyBook_Logo},
+          { name: 'MineSweeper', url: "games/minesweeper", logo: MineSweeper_Logo},
         ];
 
         return {
