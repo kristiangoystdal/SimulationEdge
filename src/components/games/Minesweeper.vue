@@ -30,18 +30,15 @@
                         {{ mineArray[rowIndex][colIndex] }}
                     </div>
                     <font-awesome-icon :icon="['fas', 'flag']" v-if="cellStateArray[rowIndex][colIndex] === 1"></font-awesome-icon>
+                    <font-awesome-icon :icon="['fas', 'bomb']" v-if="cellStateArray[rowIndex][colIndex] === 1"></font-awesome-icon>
                 </v-btn>
             </div>
         </div>
     </div>
 
-   
-
     <v-btn> {{ chosenMines }}</v-btn>
-
+    <v-btn> {{ clickedCells }}</v-btn>
     <v-btn @click="minePlacer()">Place Mines</v-btn>
-    <v-btn @click="clearArray()">Clear</v-btn>
-    <v-btn @click="checkNeighbors(2,4)">Check</v-btn>
 
     <HighscoreComp 
         :scoreTitle='scoreTitle' 
@@ -111,6 +108,7 @@
                 mobileInput: '',
                 consoleLog: '',
                 pressedKey: null,
+                clickedCells: null,
             };
         },
         computed:{
@@ -242,7 +240,6 @@
                     console.log('Right-click not possible on row:', rowIndex, 'col:', colIndex);
                 }
             },
-
             turn(row, col) {
                 if(!this.gameRunning){
                     this.gameRunning=true;
@@ -274,9 +271,11 @@
                     else{
                         this.mineArray[row][col] = numberOfNeighbors;
                     }
+                    this.checkWin();
                 } else {
                     this.clearArray();
                 }
+                
             },
             CheckGameover(row,col){
                 if(this.mineArray[row][col]==10){
@@ -285,6 +284,23 @@
                 }
                 else{
                     return false;
+                }
+            },
+            checkWin(){
+                this.clickedCells=0
+                for (let i = 0; i < this.chosenHeight; i++) {
+                    for (let j = 0; j < this.chosenLength; j++) {
+                        if(this.buttonStateArray[i][j]==true){
+                            this.clickedCells+=1
+                        }
+                    }
+                    
+                }
+                const safeCells = this.chosenHeight*this.chosenLength-this.chosenMines;
+                if(this.clickedCells==safeCells){
+                    this.gameOverState = true; 
+                    this.stopTimer();
+                    this.stopGame();
                 }
             },
             startTimer() {
@@ -312,6 +328,7 @@
                 this.cellStateArray = null;
                 this.mineArray = null;
                 this.arrayMaker();
+                this.clickedCells = 0;
             }
         },
     }
