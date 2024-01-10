@@ -27,11 +27,6 @@
       ref="mobileInput"
       >
   </div>
-  <!-- <div>
-    {{ consoleLog }}
-    {{ pressedKey }}
-    {{ isMobile }}
-  </div> -->
 
   <HighscoreComp 
     :scoreTitle='scoreTitle' 
