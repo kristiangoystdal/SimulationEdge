@@ -97,21 +97,28 @@ export default {
     async checkPrivateVideos(user) {
       try {
         if(user){
-          // Assuming you have a node named 'userPrivateVids' with user-specific private video names
-          const privateVidsRef = ref(db, `usersPrivateVids`);
+          //Shows the private videos to users with a verified email
+          if(auth.currentUser.emailVerified){
+            this.slideData = this.slideData;
+          }
+          //Shows the private videos to users that are on a private list
+          else{
+            // Assuming you have a node named 'userPrivateVids' with user-specific private video names
+            const privateVidsRef = ref(db, `usersPrivateVids`);
 
-          onValue(privateVidsRef, (snapshot) => {
-            const allowedVideoNames = snapshot.val() || {};
+            onValue(privateVidsRef, (snapshot) => {
+              const allowedVideoNames = snapshot.val() || {};
 
-            // Check if the specific key (user) exists in the snapshot
-            if (allowedVideoNames[user.uid]) {
-              // If the key exists, show all videos (private and non-private)
-              this.slideData = this.slideData;
-            } else {
-              // If the key doesn't exist, filter out all private videos
-              this.slideData = this.slideData.filter((video) => !video.private);
-            }
-          });
+              // Check if the specific key (user) exists in the snapshot
+              if (allowedVideoNames[user.uid]) {
+                // If the key exists, show all videos (private and non-private)
+                this.slideData = this.slideData;
+              } else {
+                // If the key doesn't exist, filter out all private videos
+                this.slideData = this.slideData.filter((video) => !video.private);
+              }
+            });
+          }          
         }
         else{
           this.slideData = this.slideData.filter((video) => !video.private);
