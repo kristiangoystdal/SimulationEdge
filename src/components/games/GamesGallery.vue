@@ -53,7 +53,7 @@
           { name: 'Simon Says', url: "games/simon-says", logo: Simon_Says_Logo},
         ];
         const ComingSoonGames = [
-          { name: 'Flappy Book', url: "games/flappy-book", logo: FlappyBook_Logo},
+          { name: 'Flappy Book', url: "games", logo: FlappyBook_Logo},
           { name: 'MineSweeper', url: "games/minesweeper", logo: MineSweeper_Logo},
         ];
 
