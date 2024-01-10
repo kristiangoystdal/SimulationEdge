@@ -14,6 +14,7 @@ import GamingCentral from '../pages/games/GamingCentral.vue';
 import AlphabetGame from '../pages/games/AlphabetGame.vue';
 import SimonSays from '../pages/games/SimonSays.vue';
 import FlappyBook from '../pages/games/FlappyBook.vue';
+import MineSweeper from '../pages/games/MineSweeper.vue';
 
 // Define routes
 const routes = [
@@ -27,6 +28,7 @@ const routes = [
   { path: '/games/the-alphabet-game', name: "the-alphabet-game", component: AlphabetGame },
   { path: '/games/simon-says', name: "simon-says", component: SimonSays },
   { path: '/games/flappy-book', name: "flappy-book", component: FlappyBook },
+  { path: '/games/minesweeper', name: "minesweeper", component: MineSweeper },
 ];
 
 const router = createRouter({
