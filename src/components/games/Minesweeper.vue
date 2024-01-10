@@ -23,14 +23,15 @@
                     class="cell" 
                     :disabled="this.buttonStateArray[rowIndex][colIndex]"
                     @click="turn(rowIndex,colIndex)"
-                    :id="chosenDifficulty === 'easy' ? 'easycell' : ''"
+                    :id="chosenDifficulty === 'easy' ? 'easycell' : '' || chosenDifficulty === 'medium' ? 'mediumcell' : ''"
+                    
                 >
                     
                     <div v-if="cellStateArray[rowIndex][colIndex] === 0">
                         {{ mineArray[rowIndex][colIndex] }}
                     </div>
                     <font-awesome-icon :icon="['fas', 'flag']" v-if="cellStateArray[rowIndex][colIndex] === 1"></font-awesome-icon>
-                    <font-awesome-icon :icon="['fas', 'bomb']" v-if="cellStateArray[rowIndex][colIndex] === 1"></font-awesome-icon>
+                    <font-awesome-icon :icon="['fas', 'bomb']" v-if="cellStateArray[rowIndex][colIndex] === 2"></font-awesome-icon>
                 </v-btn>
             </div>
         </div>
@@ -79,7 +80,7 @@
                 easyHeight: 5,
                 easyLength: 10,
                 easyMines: 10,
-                mediumHeight: 12,
+                mediumHeight: 9,
                 mediumLength: 16,
                 mediumMines: 40,
                 hardHeight: 12,
@@ -170,10 +171,6 @@
                 this.mineArray = tempArray1;
                 this.buttonStateArray = tempArray2;
                 this.cellStateArray = tempArray3;
-
-                console.log(this.mineArray)
-                console.log(this.buttonStateArray)
-                console.log(this.cellStateArray)
             },
             clearArray(){
                 this.arrayMaker();
@@ -222,8 +219,6 @@
                     }
                     
                 }
-
-                console.log("Number of neighbors: " + neighbors)
                 return neighbors;
                 
             },
@@ -370,9 +365,11 @@
 #easycell{
     width: 72px!important;
     height: 72px!important;
-    min-width: 20px!important; /* To override Vuetify's minimum width */
-    line-height: 20px!important; /* Adjust line height if needed */
-    padding: 0!important; /* Remove padding to maintain the size */
+}
+
+#mediumcell{
+    width: 40px!important;
+    height: 40px!important; 
 }
 
 
