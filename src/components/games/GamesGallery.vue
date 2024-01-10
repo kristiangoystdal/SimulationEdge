@@ -54,7 +54,7 @@
         ];
         const ComingSoonGames = [
           { name: 'Flappy Book', url: "games/flappy-book", logo: FlappyBook_Logo},
-          { name: 'MineSweeper', url: "games/minesweeper", logo: MineSweeper_Logo},
+          { name: 'MineSweeper', url: "games", logo: MineSweeper_Logo},
         ];
 
         return {
