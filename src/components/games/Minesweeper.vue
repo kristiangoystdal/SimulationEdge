@@ -1,45 +1,48 @@
 <template>
     <TitleVue :title='pageTitle'></TitleVue>
-    <div id="difficultSelector">
-        Choose the difficulty:
-        <div id="buttons">
-            <v-btn @click="difficultySelector('easy')" :disabled="chosenDifficulty=='easy' ? true : false">
-                Easy
-            </v-btn>
-            <v-btn @click="difficultySelector('medium')" :disabled="chosenDifficulty=='medium' ? true : false">
-                Medium
-            </v-btn>
-            <v-btn @click="difficultySelector('hard')" :disabled="chosenDifficulty=='hard' ? true : false">
-                Hard
-            </v-btn>
-        </div>
-    </div>
-
-    <div id="gameboard">
-        <div class="flex" v-for="rowIndex in Array.from({ length: chosenHeight }, (_, i) => i)" :key="rowIndex">
-            <div v-for="colIndex in Array.from({ length: chosenLength }, (_, i) => i)" :key="colIndex" 
-                @contextmenu.prevent="handleRightClick($event, rowIndex, colIndex)">
-                <v-btn 
-                    class="cell" 
-                    :disabled="this.buttonStateArray[rowIndex][colIndex]"
-                    @click="turn(rowIndex,colIndex)"
-                    :id="chosenDifficulty === 'easy' ? 'easycell' : '' || chosenDifficulty === 'medium' ? 'mediumcell' : ''"
-                    
-                >
-                    
-                    <div v-if="cellStateArray[rowIndex][colIndex] === 0">
-                        {{ mineArray[rowIndex][colIndex] }}
-                    </div>
-                    <font-awesome-icon :icon="['fas', 'flag']" v-if="cellStateArray[rowIndex][colIndex] === 1"></font-awesome-icon>
-                    <font-awesome-icon :icon="['fas', 'bomb']" v-if="cellStateArray[rowIndex][colIndex] === 2"></font-awesome-icon>
+    <div id="gameBox">
+        <div id="difficultSelector">
+            Choose the difficulty:
+            <div>{{ chosenMines }}</div>
+            <div id="buttons">
+                <v-btn @click="difficultySelector('easy')" :disabled="chosenDifficulty=='easy' ? true : false">
+                    Easy
+                </v-btn>
+                <v-btn @click="difficultySelector('medium')" :disabled="chosenDifficulty=='medium' ? true : false">
+                    Medium
+                </v-btn>
+                <v-btn @click="difficultySelector('hard')" :disabled="chosenDifficulty=='hard' ? true : false">
+                    Hard
                 </v-btn>
             </div>
         </div>
-    </div>
 
-    <v-btn> {{ chosenMines }}</v-btn>
-    <v-btn> {{ clickedCells }}</v-btn>
-    <v-btn @click="minePlacer()">Place Mines</v-btn>
+    
+       <div id="gameboard">
+            <div class="flex" v-for="rowIndex in Array.from({ length: chosenHeight }, (_, i) => i)" :key="rowIndex">
+                <div v-for="colIndex in Array.from({ length: chosenLength }, (_, i) => i)" :key="colIndex" 
+                    @contextmenu.prevent="handleRightClick($event, rowIndex, colIndex)">
+                    <v-btn 
+                        class="cell" 
+                        :disabled="this.buttonStateArray[rowIndex][colIndex]"
+                        @click="turn(rowIndex,colIndex)"
+                        :id="chosenDifficulty === 'easy' ? 'easycell' : '' || chosenDifficulty === 'medium' ? 'mediumcell' : ''"
+                        
+                    >
+                        
+                        <div v-if="cellStateArray[rowIndex][colIndex] === 0">
+                            {{ mineArray[rowIndex][colIndex] }}
+                        </div>
+                        <font-awesome-icon :icon="['fas', 'flag']" v-if="cellStateArray[rowIndex][colIndex] === 1"></font-awesome-icon>
+                        <font-awesome-icon :icon="['fas', 'bomb']" v-if="cellStateArray[rowIndex][colIndex] === 2"></font-awesome-icon>
+                    </v-btn>
+                </div>
+            </div>
+        </div> 
+    </div>
+    
+
+    
 
     <HighscoreComp 
         :scoreTitle='scoreTitle' 
@@ -88,7 +91,7 @@
                 hardMines: 99,
                 chosenDifficulty: "easy",
                 chosenHeight: 5,
-                chosenLength: 9,
+                chosenLength: 10,
                 chosenMines: 10,
                 mineArray: null,
                 buttonStateArray: null, 
@@ -175,21 +178,32 @@
             clearArray(){
                 this.arrayMaker();
             },
-            minePlacer(){
+            minePlacer(firstClickRow, firstClickCol) {
                 this.clearArray();
-                console.log("test")
-                for(let i = 0; i < this.chosenMines; i++){
-                    const randomRow = Math.floor(Math.random() * this.chosenHeight);
-                    const randomCol = Math.floor(Math.random() * this.chosenLength);
-                    if(this.mineArray[randomRow][randomCol]==null){
-                        this.mineArray[randomRow][randomCol]=10
-                        this.cellStateArray[randomRow][randomCol]=0
+                for (let i = 0; i < this.chosenMines; i++) {
+                    let randomRow, randomCol, isSafeZone;
 
-                    }
-                    else{
-                        i-=1;
-                    }
+                    do {
+                        randomRow = Math.floor(Math.random() * this.chosenHeight);
+                        randomCol = Math.floor(Math.random() * this.chosenLength);
+                        isSafeZone = this.isInSafeZone(randomRow, randomCol, firstClickRow, firstClickCol);
+
+                    } while (isSafeZone || this.mineArray[randomRow][randomCol] === 10);
+
+                    this.mineArray[randomRow][randomCol] = 10;
+                    this.cellStateArray[randomRow][randomCol] = 0;
                 }
+            },
+            isInSafeZone(row, col, safeCenterRow, safeCenterCol) {
+                const safeZoneRadius = 1; // You can adjust this to increase/decrease the safe area
+
+                return row >= safeCenterRow - safeZoneRadius && row <= safeCenterRow + safeZoneRadius &&
+                    col >= safeCenterCol - safeZoneRadius && col <= safeCenterCol + safeZoneRadius;
+            },
+            startGame(row, col){
+                this.gameRunning = true;
+                this.minePlacer(row, col);
+                this.startTimer();
             },
             checkNeighbors(row, col){
                 let neighbors = 0
@@ -237,8 +251,7 @@
             },
             turn(row, col) {
                 if(!this.gameRunning){
-                    this.gameRunning=true;
-                    this.startTimer();
+                    this.startGame(row, col);
                 }
                 const gameState = this.CheckGameover(row, col);
                 this.cellStateArray[row][col]=0
@@ -268,9 +281,32 @@
                     }
                     this.checkWin();
                 } else {
-                    this.clearArray();
+                    this.cellStateArray[row][col]=2
+                    this.stopGame();
                 }
                 
+            },
+            stopGame() {
+                this.stopTimer();
+                for (let i = 0; i < this.chosenHeight; i++) {
+                    for (let j = 0; j < this.chosenLength; j++) {
+                        // Disable the button to prevent further interaction
+                        this.buttonStateArray[i][j] = true;
+
+                        // If it's a mine, set the appropriate state
+                        if (this.mineArray[i][j] == 10) {
+                            this.cellStateArray[i][j] = 2; // State for a revealed mine
+                        } else {
+                            // If it's not a mine, calculate and display the number of neighboring mines
+                            const numberOfNeighbors = this.checkNeighbors(i, j);
+                            if(numberOfNeighbors != 0) {
+                                this.mineArray[i][j] = numberOfNeighbors; // Display the number of neighboring mines
+                                this.cellStateArray[i][j] = 0; 
+                            }
+
+                        }
+                    }
+                }
             },
             CheckGameover(row,col){
                 if(this.mineArray[row][col]==10){
@@ -306,9 +342,6 @@
                     const diff = (now - this.startTime) / 1000;
                     this.timer = diff;
                 }
-                if(!this.done){
-                    // this.checkWin();
-                }
                 }, 10);
             },
             stopTimer() {
@@ -331,17 +364,27 @@
 
 <style scoped>
 
+#gameBox{
+    align-items: center;
+    margin: auto;
+    padding: 2vw;
+    border: solid;
+    background-color: bisque;
+    border-radius: 20px;
+}
+
 #difficultSelector{
     border: solid;
     margin: 0 auto;
     margin-bottom: 0;
     text-align: center;
-    width: 20%;
+    width: min-content;
 }
 #buttons{
     display: flex;
     margin-top: 1vw;
     justify-content: space-between;
+    padding: 1vw;
 }
 
 #gameboard{
@@ -350,8 +393,7 @@
     border: solid;
 }
 .flex{
-    display: flex;
-    
+    display: flex; 
 }
 
 .cell {
