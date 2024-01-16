@@ -2,16 +2,18 @@
     <TitleVue :title='pageTitle'></TitleVue>
     <div id="gameBox">
         <div id="difficultSelector">
-            Choose the difficulty:
-            <div>{{ chosenMines }}</div>
+            <div> Number of mines: {{ chosenMines }}</div>
             <div id="buttons">
-                <v-btn @click="difficultySelector('easy')" :disabled="chosenDifficulty == 'easy' ? true : false">
+                <v-btn @click="difficultySelector('easy')" :disabled="chosenDifficulty == 'easy' ? true : false"
+                    id="diffultyBtn">
                     Easy
                 </v-btn>
-                <v-btn @click="difficultySelector('medium')" :disabled="chosenDifficulty == 'medium' ? true : false">
+                <v-btn @click="difficultySelector('medium')" :disabled="chosenDifficulty == 'medium' ? true : false"
+                    id="diffultyBtn">
                     Medium
                 </v-btn>
-                <v-btn @click="difficultySelector('hard')" :disabled="chosenDifficulty == 'hard' ? true : false">
+                <v-btn @click="difficultySelector('hard')" :disabled="chosenDifficulty == 'hard' ? true : false"
+                    id="diffultyBtn">
                     Hard
                 </v-btn>
             </div>
@@ -38,7 +40,6 @@
             </div>
         </div>
     </div>
-
 
 
 
@@ -91,7 +92,7 @@ export default {
             intervalId: null,
             done: false,
             dbPath: "minesweeper",
-            userPath: "minesweepeScores",
+            userPath: "minesweeper",
             scoreTitle: "Time",
             label: "seconds",
             highToLow: true,
@@ -136,6 +137,8 @@ export default {
             }
 
             this.arrayMaker();
+            this.stopTimer();
+            this.reset();
         },
         async arrayMaker() {
             this.mineArray = null
@@ -331,8 +334,23 @@ export default {
             if (this.user) {
                 const uid = this.user.uid;
                 const date = new Date();
-                var datepath = date.getDate() + 'q' + date.getMonth() + 'q' + date.getFullYear() + 'e';
-                console.log(datepath);
+                var datepath = "";
+                if (date.getDate() < 10) {
+                    datepath += "0" + date.getDate();
+                }
+                else {
+                    datepath += date.getDate();
+                }
+                datepath += 'q';
+                if (date.getMonth() + 1 < 10) {
+                    datepath += "0" + (date.getMonth() + 1);
+                }
+                else {
+                    datepath += (date.getMonth() + 1);
+                }
+                datepath += 'q';
+                datepath += date.getFullYear();
+                datepath += 'e';
 
                 if (date.getHours() < 10) {
                     datepath += "0" + date.getHours();
@@ -357,8 +375,9 @@ export default {
                 // q = '-'
                 // e = ' '
                 // w = ':'
+                console.log(datepath);
 
-                const time = this.timer.toFixed(2);
+                const time = this.timer.toFixed(1);
                 const path = `/users/${uid}/minesweeper/${datepath}`;
 
                 // Add the timer value under the "Minesweeper" subfolder
@@ -387,7 +406,7 @@ export default {
                         const currentScore = snapshot.val();
 
                         // Check if the current score is smaller than the new time
-                        if (currentScore - time > 0) {
+                        if (currentScore - time > 0 || currentScore == null) {
                             // Update the value under the "highscores" subfolder
                             set(currentScoreRef, time).then(() => {
                                 // Data added successfully
@@ -409,14 +428,14 @@ export default {
                     const diff = (now - this.startTime) / 1000;
                     this.timer = diff;
                 }
-            }, 10);
+            }, 1);
         },
         stopTimer() {
             clearInterval(this.intervalId);
         },
         reset() {
             this.startTime = null;
-            this.timer = null;
+            this.timer = 0;
             this.gameRunning = false;
             this.gameOverState = false;
             this.buttonStateArray = null;
@@ -437,12 +456,14 @@ export default {
     border: solid;
     background-color: bisque;
     border-radius: 20px;
+    max-width: 1200px;
+    width: 90%;
 }
 
 #difficultSelector {
-    border: solid;
+    /* border: solid; */
     margin: 0 auto;
-    margin-bottom: 0;
+    margin-bottom: 1vw;
     text-align: center;
     width: min-content;
 }
@@ -454,10 +475,17 @@ export default {
     padding: 1vw;
 }
 
+#diffultyBtn {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 0 1vw;
+}
+
 #gameboard {
     margin: 2vw auto;
     margin-top: 0;
     border: solid;
+    width: fit-content;
 }
 
 .flex {
