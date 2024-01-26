@@ -1,51 +1,67 @@
 <template>
     <TitleVue :title='pageTitle'></TitleVue>
-    <div id="gameBox">
-        <div id="difficultSelector">
-            <div> Number of mines: {{ chosenMines }}</div>
-            <div id="buttons">
-                <v-btn @click="difficultySelector('easy')" :disabled="chosenDifficulty == 'easy' ? true : false"
-                    id="diffultyBtn">
-                    Easy
-                </v-btn>
-                <v-btn @click="difficultySelector('medium')" :disabled="chosenDifficulty == 'medium' ? true : false"
-                    id="diffultyBtn">
-                    Medium
-                </v-btn>
-                <v-btn @click="difficultySelector('hard')" :disabled="chosenDifficulty == 'hard' ? true : false"
-                    id="diffultyBtn">
-                    Hard
-                </v-btn>
-            </div>
-        </div>
+    <div v-if="isScreenWideEnough">
+        <div id="gameBox">
+            <div id="difficultSelector">
 
-
-        <div id="gameboard">
-            <div class="flex" v-for="rowIndex in Array.from({ length: chosenHeight }, (_, i) => i)" :key="rowIndex">
-                <div v-for="colIndex in Array.from({ length: chosenLength }, (_, i) => i)" :key="colIndex"
-                    @contextmenu.prevent="handleRightClick($event, rowIndex, colIndex)">
-                    <v-btn class="cell" :disabled="this.buttonStateArray[rowIndex][colIndex]"
-                        @click="turn(rowIndex, colIndex)"
-                        :id="chosenDifficulty === 'easy' ? 'easycell' : '' || chosenDifficulty === 'medium' ? 'mediumcell' : ''">
-
-                        <div v-if="cellStateArray[rowIndex][colIndex] === 0">
-                            {{ mineArray[rowIndex][colIndex] }}
-                        </div>
-                        <font-awesome-icon :icon="['fas', 'flag']"
-                            v-if="cellStateArray[rowIndex][colIndex] === 1"></font-awesome-icon>
-                        <font-awesome-icon :icon="['fas', 'bomb']"
-                            v-if="cellStateArray[rowIndex][colIndex] === 2"></font-awesome-icon>
+                <div id="buttons">
+                    <v-btn @click="difficultySelector('easy')" :disabled="chosenDifficulty == 'easy' ? true : false"
+                        id="diffultyBtn">
+                        Easy
+                    </v-btn>
+                    <v-btn @click="difficultySelector('medium')" :disabled="chosenDifficulty == 'medium' ? true : false"
+                        id="diffultyBtn">
+                        Medium
+                    </v-btn>
+                    <v-btn @click="difficultySelector('hard')" :disabled="chosenDifficulty == 'hard' ? true : false"
+                        id="diffultyBtn">
+                        Hard
                     </v-btn>
                 </div>
+                <div id="bombtext"> {{ flaggedCells }}</div>
+            </div>
+
+
+            <div id="gameboard">
+                <div class="flex" v-for="rowIndex in Array.from({ length: chosenHeight }, (_, i) => i)" :key="rowIndex">
+                    <div v-for="colIndex in Array.from({ length: chosenLength }, (_, i) => i)" :key="colIndex"
+                        @contextmenu.prevent="handleRightClick($event, rowIndex, colIndex)">
+                        <v-btn class="cell" :disabled="this.buttonStateArray[rowIndex][colIndex]"
+                            @click="turn(rowIndex, colIndex)"
+                            :id="chosenDifficulty === 'easy' ? 'easycell' : '' || chosenDifficulty === 'medium' ? 'mediumcell' : ''">
+
+                            <div v-if="cellStateArray[rowIndex][colIndex] === 0">
+                                <div v-if="mineArray[rowIndex][colIndex] === 10">
+
+                                </div>
+                                <div v-else>
+                                    {{ mineArray[rowIndex][colIndex] }}
+                                </div>
+                            </div>
+                            <font-awesome-icon :icon="['fas', 'flag']"
+                                v-if="cellStateArray[rowIndex][colIndex] === 1"></font-awesome-icon>
+                            <font-awesome-icon :icon="['fas', 'bomb']"
+                                v-if="cellStateArray[rowIndex][colIndex] === 2"></font-awesome-icon>
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div v-else>
+        <div id="gameBox">
+            <div id="mobileMessage">
+                MineSweeper is not playable on mobile devices yet
+                <br><br>
+                Please use desktop to play this game
             </div>
         </div>
     </div>
 
 
-
-    <HighscoreComp :scoreTitle='scoreTitle' :userScoresPath="userPath" :databasePath="dbPath" :resetFunction="reset"
-        :score="formattedTimer" :scoreLabel="label" :sortWay="highToLow" :buttonDisable="resetButtonState"
-        :buttonText="resetButtonText" :buttonFunction="reset">
+    <HighscoreComp :scoreTitle='scoreTitle' :userScoresPath="computedUserPath" :databasePath="computedDbPath"
+        :resetFunction="reset" :score="formattedTimer" :scoreLabel="label" :sortWay="highToLow"
+        :buttonDisable="resetButtonState" :buttonText="resetButtonText" :buttonFunction="reset">
     </HighscoreComp>
 </template>
 
@@ -91,8 +107,8 @@ export default {
             timer: 0,
             intervalId: null,
             done: false,
-            dbPath: "minesweeper",
-            userPath: "minesweeper",
+            dbPath: `minesweeper/${this.chosenDifficulty}`,
+            userPath: `minesweeper/${this.chosenDifficulty}`,
             scoreTitle: "Time",
             label: "seconds",
             highToLow: true,
@@ -102,7 +118,16 @@ export default {
             consoleLog: '',
             pressedKey: null,
             clickedCells: null,
+            isScreenWideEnough: false,
         };
+    },
+    watch: {
+        chosenDifficulty(newDifficulty, oldDifficulty) {
+            if (newDifficulty !== oldDifficulty) {
+                this.dbPath = `minesweeper/${newDifficulty}`;
+                this.userPath = `minesweeper/${newDifficulty}`;
+            }
+        }
     },
     computed: {
         formattedTimer() {
@@ -111,11 +136,34 @@ export default {
         user() {
             return this.$store.getters.getCurrUser;
         },
+        computedDbPath() {
+            return `minesweeper/${this.chosenDifficulty}`;
+        },
+        computedUserPath() {
+            return `minesweeper/${this.chosenDifficulty}`;
+        },
+        flaggedCells() {
+            var numberOfFlaggedCells = 0
+            for (let rowIndex = 0; rowIndex < this.mineArray.length; rowIndex++) {
+                for (let colIndex = 0; colIndex < this.mineArray[rowIndex].length; colIndex++) {
+                    if (this.cellStateArray[rowIndex][colIndex] == 1) {
+                        numberOfFlaggedCells += 1
+                    }
+                }
+            }
+            if (numberOfFlaggedCells <= this.chosenMines) {
+                return "You are missing " + (this.chosenMines - numberOfFlaggedCells).toString() + " mines"
+            }
+            else {
+                return "You have flagged too many mines"
+            }
+
+        },
     },
     created() {
+        this.checkScreenWidth();
         this.arrayMaker(); // Initialize the mineArray when component is created
     },
-
     methods: {
         difficultySelector(value) {
             this.chosenDifficulty = value;
@@ -378,7 +426,8 @@ export default {
                 console.log(datepath);
 
                 const time = this.timer.toFixed(1);
-                const path = `/users/${uid}/minesweeper/${datepath}`;
+                const path = `/users/${uid}/minesweeper/${this.chosenDifficulty}/${datepath}`;
+                console.log(path);
 
                 // Add the timer value under the "Minesweeper" subfolder
                 set(ref(db, path), time).then(() => {
@@ -389,7 +438,7 @@ export default {
 
                 if (this.user.emailVerified) {
                     const displayPath = `${this.user.uid}`;
-                    const latestPath = `/games/minesweeper/latestScores/` + displayPath;
+                    const latestPath = `/games/minesweeper/${this.chosenDifficulty}/latestScores/` + displayPath;
 
                     // Add the timer value under the "latestScores" subfolder
                     set(ref(db, latestPath), time).then(() => {
@@ -398,7 +447,7 @@ export default {
                         console.error('Error adding data:', error);
                     });
 
-                    const topPath = `/games/minesweeper/highscores/` + displayPath;
+                    const topPath = `/games/minesweeper/${this.chosenDifficulty}/highscores/` + displayPath;
 
                     // Get the current value at topPath
                     const currentScoreRef = ref(db, topPath);
@@ -443,7 +492,22 @@ export default {
             this.mineArray = null;
             this.arrayMaker();
             this.clickedCells = 0;
-        }
+        },
+        checkScreenWidth() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const isTablet = width >= 768 && width <= 1024; // Define tablet size range
+            const isLandscape = width > height;
+
+            if (isTablet && isLandscape) {
+                // Tablet in landscape mode
+                this.isScreenWideEnough = true;
+            } else {
+                // Mobile or tablet in portrait mode
+                this.isScreenWideEnough = width >= 769;
+            }
+        },
+
     },
 }
 </script>
@@ -511,6 +575,13 @@ export default {
 #mediumcell {
     width: 40px !important;
     height: 40px !important;
+}
+
+#mobileMessage {
+    padding: 10vw 2vw;
+    font-size: 5vw;
+    font-family: 'TitleFont';
+    text-align: center;
 }
 
 
