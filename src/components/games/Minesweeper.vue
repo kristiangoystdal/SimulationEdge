@@ -262,10 +262,8 @@ export default {
                 }
                 if (i != 0) {
                     if (col == 0 && i == -1) {
-                        console.log("border left")
                     }
                     else if (col == (this.chosenLength - 1) && i == +1) {
-                        console.log("border right")
                     }
                     else {
                         if (this.mineArray[row][col + i] == 10) {
@@ -281,14 +279,11 @@ export default {
         handleRightClick(event, rowIndex, colIndex) {
             event.preventDefault();  // Call this first
 
-            console.log('Right-click detected on row:', rowIndex, 'col:', colIndex);
             if (!this.buttonStateArray[rowIndex][colIndex]) {
                 this.cellStateArray[rowIndex][colIndex] += 1;
                 if (this.cellStateArray[rowIndex][colIndex] == 2) {
                     this.cellStateArray[rowIndex][colIndex] = 0;
                 }
-            } else {
-                console.log('Right-click not possible on row:', rowIndex, 'col:', colIndex);
             }
         },
         turn(row, col) {
@@ -375,7 +370,6 @@ export default {
                 this.stopTimer();
                 this.stopGame();
                 this.saveGame();
-                console.log("WIN");
             }
         },
         saveGame() {
@@ -423,17 +417,14 @@ export default {
                 // q = '-'
                 // e = ' '
                 // w = ':'
-                console.log(datepath);
 
                 const time = this.timer.toFixed(1);
                 const path = `/users/${uid}/minesweeper/${this.chosenDifficulty}/${datepath}`;
-                console.log(path);
 
                 // Add the timer value under the "Minesweeper" subfolder
                 set(ref(db, path), time).then(() => {
                     // Data added successfully
                 }).catch((error) => {
-                    console.error('Error adding data:', error);
                 });
 
                 if (this.user.emailVerified) {
@@ -444,7 +435,6 @@ export default {
                     set(ref(db, latestPath), time).then(() => {
                         // Data added successfully
                     }).catch((error) => {
-                        console.error('Error adding data:', error);
                     });
 
                     const topPath = `/games/minesweeper/${this.chosenDifficulty}/highscores/` + displayPath;
@@ -460,11 +450,9 @@ export default {
                             set(currentScoreRef, time).then(() => {
                                 // Data added successfully
                             }).catch((error) => {
-                                console.error('Error updating data:', error);
                             });
                         }
                     }).catch((error) => {
-                        console.error('Error retrieving data:', error);
                     });
                 }
             }
