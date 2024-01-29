@@ -477,7 +477,7 @@ export default {
                     const diff = (now - this.startTime) / 1000;
                     this.timer = diff;
                 }
-            }, 1);
+            }, 1000);
         },
         stopTimer() {
             clearInterval(this.intervalId);
