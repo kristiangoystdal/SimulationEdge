@@ -4,23 +4,9 @@
   <div id="gallery">
     <v-container>
       <v-row>
-        <v-col
-          v-for="(item, index) in slideData"
-          :key="index"
-          :cols="mobile ? 12 : 6"
-          sm="6"
-          md="6"
-          lg="6"
-        >
-          <video
-            :key="index"
-            :poster="item.image"
-            :src="item.video"
-            :ref="`videoPlayer${index}`"
-            controls
-            @play="playVideo(index)"
-            @pause="stopVideo(index)"
-          >
+        <v-col v-for="(item, index) in slideData" :key="index" :cols="mobile ? 12 : 6" sm="6" md="6" lg="6">
+          <video :key="index" :poster="item.image" :src="item.video" :ref="`videoPlayer${index}`" controls
+            @play="playVideo(index)" @pause="stopVideo(index)">
             Your browser does not support the video tag.
           </video>
           <div id="videoName">
@@ -52,16 +38,19 @@ import LofotenImage from '../../assets/photos/Lofoten.png';
 import LofotenVideo from '../../assets/videos/Lofoten.mp4';
 import BrusselImage from '../../assets/photos/Brussel.jpg';
 import BrusselVideo from '../../assets/videos/Brussel.mov';
+import Åre24Image from '../../assets/photos/Åre_2024.jpg';
+import Åre24Video from '../../assets/videos/Åre_2024.mp4';
 
 export default {
   name: 'VideoGallery',
   data() {
     const slideData = [
-      { name: 'Åre', image: AreImage, video: AreVideo, private: false},
-      { name: 'Trehyttetur', image: TrehytteImage, video: TrehytteVideo, private: false},
-      { name: 'USA', image: USAImage, video: USAVideo, private: true},
-      { name: 'Lofoten', image: LofotenImage, video: LofotenVideo, private: true},
-      { name: 'Brussel', image: BrusselImage, video: BrusselVideo, private: false},
+      { name: 'Åre 2023', image: AreImage, video: AreVideo, private: false },
+      { name: 'Trehyttetur', image: TrehytteImage, video: TrehytteVideo, private: false },
+      { name: 'USA', image: USAImage, video: USAVideo, private: true },
+      { name: 'Lofoten', image: LofotenImage, video: LofotenVideo, private: true },
+      { name: 'Brussel', image: BrusselImage, video: BrusselVideo, private: false },
+      { name: 'Åre 2024', image: Åre24Image, video: Åre24Video, private: false },
     ];
 
     return {
@@ -84,25 +73,28 @@ export default {
         this.stopVideo(this.activeVideoIndex);
       }
       this.activeVideoIndex = index;
+      const videoElement = this.$refs[`videoPlayer${index}`][0];
+      if (videoElement && typeof videoElement.play === 'function') {
+        videoElement.play();
+      }
     },
     stopVideo(index) {
       if (index !== null) {
         const videoElement = this.$refs[`videoPlayer${index}`][0];
-        if (videoElement && typeof videoElement.pause === 'function' && !videoElement.paused) {
+        if (videoElement && typeof videoElement.pause === 'function') {
           videoElement.pause();
         }
-        this.activeVideoIndex = null;
       }
     },
     async checkPrivateVideos(user) {
       try {
-        if(user){
+        if (user) {
           //Shows the private videos to users with a verified email
-          if(auth.currentUser.emailVerified){
+          if (auth.currentUser.emailVerified) {
             this.slideData = this.slideData;
           }
           //Shows the private videos to users that are on a private list
-          else{
+          else {
             // Assuming you have a node named 'userPrivateVids' with user-specific private video names
             const privateVidsRef = ref(db, `usersPrivateVids`);
 
@@ -118,12 +110,12 @@ export default {
                 this.slideData = this.slideData.filter((video) => !video.private);
               }
             });
-          }          
+          }
         }
-        else{
+        else {
           this.slideData = this.slideData.filter((video) => !video.private);
         }
-        
+
       } catch (error) {
         console.error('Error checking private videos:', error);
       }
@@ -161,7 +153,7 @@ video {
 
 
 @media (min-width: 769px) {
-  #videoName{
+  #videoName {
     text-align: center;
     font-size: 1.6vw;
     padding-bottom: 5vw;
@@ -171,7 +163,7 @@ video {
 }
 
 @media (max-width: 768px) {
-  #videoName{
+  #videoName {
     text-align: center;
     font-size: 5vw;
     padding-bottom: 5vw;
