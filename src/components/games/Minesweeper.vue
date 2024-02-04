@@ -3,7 +3,6 @@
     <div v-if="isScreenWideEnough">
         <div id="gameBox">
             <div id="difficultSelector">
-
                 <div id="buttons">
                     <v-btn @click="difficultySelector('easy')" :disabled="chosenDifficulty == 'easy' ? true : false"
                         id="diffultyBtn">
@@ -151,7 +150,13 @@ export default {
                     }
                 }
             }
-            if (numberOfFlaggedCells <= this.chosenMines) {
+            if (this.gameOverState) {
+                return "You activated a mine... Game Over..."
+            }
+            else if (this.clickedCells == this.chosenHeight * this.chosenLength - this.chosenMines) {
+                return "You found all mines! You won!"
+            }
+            else if (numberOfFlaggedCells <= this.chosenMines) {
                 return "You are missing " + (this.chosenMines - numberOfFlaggedCells).toString() + " mines"
             }
             else {
@@ -292,7 +297,7 @@ export default {
             }
             const gameState = this.CheckGameover(row, col);
             this.cellStateArray[row][col] = 0
-            if (!gameState) {
+            if (!this.gameOverState) {
                 const numberOfNeighbors = this.checkNeighbors(row, col);
                 this.buttonStateArray[row][col] = true;
 
@@ -320,6 +325,7 @@ export default {
             } else {
                 this.cellStateArray[row][col] = 2
                 this.stopGame();
+                this.stopTimer();
             }
 
         },
@@ -344,6 +350,10 @@ export default {
                     }
                 }
             }
+            while (this.intervalId != 0) {
+                this.intervalId = 0
+                console.log(this.intervalId);
+            }
         },
         CheckGameover(row, col) {
             if (this.mineArray[row][col] == 10) {
@@ -366,7 +376,6 @@ export default {
             }
             const safeCells = this.chosenHeight * this.chosenLength - this.chosenMines;
             if (this.clickedCells == safeCells) {
-                this.gameOverState = true;
                 this.stopTimer();
                 this.stopGame();
                 this.saveGame();
@@ -568,6 +577,13 @@ export default {
 #mobileMessage {
     padding: 10vw 2vw;
     font-size: 5vw;
+    font-family: 'TitleFont';
+    text-align: center;
+}
+
+#bombtext {
+
+    font-size: 1vw;
     font-family: 'TitleFont';
     text-align: center;
 }
