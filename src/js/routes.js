@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { isAuthenticated } from './firebase.js';
 import { getAuth, onAuthStateChanged} from "firebase/auth"
+import { getDatabase, ref, get } from "firebase/database";
 
 
 // Import page components
@@ -9,6 +10,7 @@ import Games from '../pages/main/Games.vue';
 import Login from '../pages/main/Login.vue';
 import Register from '../pages/main/Register.vue';
 import Account from '../pages/main/Account.vue';
+import Admin from '../pages/main/Admin.vue';
 import Videos from '../pages/main/Videos.vue';
 import GamingCentral from '../pages/games/GamingCentral.vue';
 import AlphabetGame from '../pages/games/AlphabetGame.vue';
@@ -25,6 +27,7 @@ const routes = [
   { path: '/login', name: "login", component: Login },
   { path: '/register', name: "register", component: Register },
   { path: '/account', name: "account", component: Account, meta: { requiresAuth: true },},
+  { path: '/admin', name: "admin", component: Admin, meta: { requiresAuth: true, requiresAdmin: true },},
   { path: '/games/gaming-central', name: "gaming-central", component: GamingCentral },
   { path: '/games/the-alphabet-game', name: "the-alphabet-game", component: AlphabetGame },
   { path: '/games/simon-says', name: "simon-says", component: SimonSays },
@@ -38,13 +41,41 @@ const router = createRouter({
   routes,
 });
 
+// Add this function to check if the user is an admin
+async function isAdmin(userId) {
+  const db = getDatabase();
+  const userRef = ref(db, `users/${userId}`);
+  try {
+    const snapshot = await get(userRef);
+    if (snapshot.exists()) {
+      const userData = snapshot.val();
+      return userData.role === 'admin'; // Check if the user's role is 'admin'
+    }
+    return false; // No user data found, or user does not have the 'admin' role
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
+}
+
 router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    const isAuthenticated = await checkAuthentication();
-    if (!isAuthenticated) {
-      next({ name: 'home' }); // Redirect to home if not authenticated
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user) {
+      // If the route requires an admin role, additionally check if the user is an admin
+      if (to.meta.requiresAdmin) {
+        const userIsAdmin = await isAdmin(user.uid);
+        if (userIsAdmin) {
+          next(); // User is an admin, proceed to the route
+        } else {
+          next({ name: 'home' }); // User is not an admin, redirect to home
+        }
+      } else {
+        next(); // For authenticated routes that don't require an admin role, proceed as usual
+      }
     } else {
-      next(); // Proceed to the requested route if authenticated
+      next({ name: 'login' }); // Redirect to login if not authenticated
     }
   } else {
     next(); // For routes that don't require authentication, proceed as usual
