@@ -56,7 +56,7 @@ export default {
     const ComingSoonGames = [
       { name: 'Flappy Book', url: "games", logo: FlappyBook_Logo },
       { name: 'MineSweeper', url: "games", logo: MineSweeper_Logo },
-      { name: 'Numbers Game', url: "games/numbers-game", logo: numbersGameLogo },
+      { name: 'Numbers Game', url: "games", logo: numbersGameLogo },
     ];
 
     return {
