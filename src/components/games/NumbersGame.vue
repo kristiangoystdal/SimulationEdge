@@ -2,12 +2,12 @@
   <TitleVue :title='pageTitle'></TitleVue>
 
   <v-container id="box">
-    <div id="content" v-if="timeLeft == 15">
+    <div id="content" v-if="timeLeft == 15 && !gameover">
       <v-btn @click="startTimer" id="btn">
         Start Round {{ score + 1 }}
       </v-btn>
     </div>
-    <div id="content" v-else-if="timeLeft">
+    <div id="content" v-else-if="timeLeft && !gameover">
       <div id="numbersBox">
         {{ numbers }}
       </div>
@@ -15,13 +15,33 @@
         <div class="timer-bar" :style="{ width: barWidth + '%' }"></div>
       </div>
     </div>
-    <div id="content" v-else-if="done">
+    <div id="content" v-else-if="done && !gameover">
       <div id="input">
-        <input type="text" id="inputBox" @input="restrictToNumbers">
+        <input type="text" id="inputBox" ref="inputBoxRef" @input="restrictToNumbers" @keyup.enter="checkWin"
+          v-model="inputText">
       </div>
       <div id="btn">
         <v-btn @click="checkWin">
           Submit Number
+        </v-btn>
+      </div>
+    </div>
+    <div id="content" v-else-if="gameover">
+      <div id="numbersBox">
+        <strong>Real Number: </strong>
+        <span v-for="(char, index) in numbers" :key="index" :class="{ 'green-text': char !== inputText.charAt(index) }">
+          {{ char }}
+        </span>
+      </div>
+      <div id="numbersBox">
+        <strong> Your guess: </strong>
+        <span v-for="(char, index) in inputText" :key="index" :class="{ 'red-text': char !== numbers.charAt(index) }">
+          {{ char }}
+        </span>
+      </div>
+      <div id="btn">
+        <v-btn @click="reset">
+          Start New Game
         </v-btn>
       </div>
     </div>
@@ -46,14 +66,14 @@ export default {
   data() {
     return {
       numbers: "",
-      input: "",
+      inputText: "",
       done: false,
       pageTitle: "Numbers Game",
       dbPath: "numbersGame",
       userPath: "numbersGame",
       scoreTitle: "Score",
-      label: "numbers",
-      highToLow: true,
+      label: "",
+      highToLow: false,
       resetButtonState: true,
       resetButtonText: "Reset",
       mobileInput: '',
@@ -63,7 +83,8 @@ export default {
       totalTime: 15, // Total time in seconds
       timeLeft: 15,
       timer: null,
-      intervalTime: 1000
+      intervalTime: 1000,
+      gameover: false,
     };
   },
   components: {
@@ -96,13 +117,16 @@ export default {
           this.clearTimer(); // Once the timer reaches 0, clear the interval
           this.done = true;
           this.timeLeft = 0; // Ensure it's explicitly set to 0 to avoid negative values.
+          this.$nextTick(() => {
+            this.$refs.inputBoxRef.focus();
+          });
         }
       }, 10); // Update every 10ms for smoother countdown.
     },
-
     clearTimer() {
       clearInterval(this.timer); // Clear the interval
       this.timer = null; // Reset the timer property
+
     },
     randomNumbers() {
       this.numbers = ""
@@ -111,11 +135,16 @@ export default {
       }
     },
     checkWin() {
-      if (this.input == this.numbers) {
-        score++;
+      console.log(this.inputText);
+      console.log(this.numbers)
+      if (this.inputText == this.numbers) {
+        this.score++;
+        this.timeLeft = this.totalTime;
+        this.inputText = "";
       }
       else {
         this.SendScore()
+        this.gameover = true
       }
     },
     SendScore() {
@@ -175,12 +204,13 @@ export default {
           const currentScoreRef = ref(db, topPath);
           get(currentScoreRef).then((snapshot) => {
             const currentScore = snapshot.val();
+            console.log('Current score:', currentScore);
 
-            // Check if the current score is smaller than the new time
-            if (currentScore - time > 0) {
+            // Check if there is no current score or if the current score is greater than the new time
+            if (currentScore === null || currentScore < time) {
               // Update the value under the "highscores" subfolder
               set(currentScoreRef, time).then(() => {
-                // Data added successfully
+                console.log('Highscore updated successfully');
               }).catch((error) => {
                 console.error('Error updating data:', error);
               });
@@ -188,6 +218,7 @@ export default {
           }).catch((error) => {
             console.error('Error retrieving data:', error);
           });
+
         }
       }
     },
@@ -216,19 +247,49 @@ export default {
       });
     },
     reset() {
-      this.input = "";
-      this.currentIndex = 0;
-      this.timer = null;
+      // Reset input and game state
+      this.inputText = "";
       this.done = false;
+      this.numbers = "";
+      this.score = 0;
+      this.timeLeft = this.totalTime;
+      this.gameover = false;
+
+
+      if (this.timer) {
+        clearInterval(this.timer);
+        this.timer = null;
+      }
     },
-    restrictToNumbers(event) {
-      // Remove any non-digit characters from the input value
-      event.target.value = event.target.value.replace(/\D/g, '');
+    restrictToNumbers() {
+      // Remove any non-digit characters from the inputText value
+      this.inputText = this.inputText.replace(/\D/g, '');
     },
+    onKeyDown(event) {
+      // Handle the keydown event
+      console.log(`Key pressed: ${event.key}`);
+      if (event.key == 'Enter') {
+
+        if (this.gameover) {
+          this.reset();
+        }
+        else if (this.timeLeft == 15 && !this.gameover) {
+          this.startTimer();
+        }
+        else if (this.done && !this.gameover) {
+          this.checkWin();
+        }
+      }
+      // Implement any specific logic here based on the key pressed
+    },
+
+
   },
   mounted() {
+    window.addEventListener('keydown', this.onKeyDown);
   },
   beforeUnmount() {
+    window.removeEventListener('keydown', this.onKeyDown);
   },
 };
 </script>
@@ -239,6 +300,14 @@ export default {
 * {
   margin: 0;
   padding: 0;
+}
+
+.red-text {
+  color: red
+}
+
+.green-text {
+  color: green
 }
 
 #box {
@@ -255,19 +324,20 @@ export default {
 }
 
 #content {
-  border: solid;
   width: 90%;
+  min-height: 15vw;
   margin: auto;
-  justify-content: center;
-  /* display: flexbox; */
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
 }
+
 
 #btn {
   margin: 2vw auto;
   justify-content: center;
   display: flex;
-
 }
 
 #numbersBox {
@@ -275,10 +345,8 @@ export default {
   text-align: center;
   font-size: xx-large;
   overflow-wrap: break-word;
-  border: solid;
   margin: auto;
 }
-
 
 .timer-container {
   width: 50%;
@@ -289,12 +357,18 @@ export default {
   margin: 2vw auto 1vw auto;
 }
 
-
 .timer-bar {
   height: 100%;
   background-color: #ffffff;
   transition: width 0.1s linear;
   border-radius: 5px;
+}
+
+#input {
+  margin: 2vw auto;
+  display: flex;
+  justify-content: center;
+  width: 90%;
 }
 
 #inputBox {
@@ -303,6 +377,8 @@ export default {
   border: 1px solid #ccc;
   padding: 8px;
   outline: none;
+  width: 60%;
+  font-size: xx-large;
 }
 
 #inputBox:focus {

@@ -52,11 +52,11 @@ export default {
       { name: 'Gaming Central', url: "games/gaming-central", logo: Gaming_Central_Logo },
       { name: 'The Alphabet Game', url: "games/the-alphabet-game", logo: Alphabet_Game_Logo },
       { name: 'Simon Says', url: "games/simon-says", logo: Simon_Says_Logo },
+      { name: 'Numbers Game', url: "games/numbers-game", logo: numbersGameLogo },
     ];
     const ComingSoonGames = [
       { name: 'Flappy Book', url: "games", logo: FlappyBook_Logo },
       { name: 'MineSweeper', url: "games", logo: MineSweeper_Logo },
-      { name: 'Numbers Game', url: "games", logo: numbersGameLogo },
     ];
 
     return {
