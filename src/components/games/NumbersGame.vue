@@ -116,6 +116,7 @@ export default {
       }
       else {
         this.SendScore()
+        this.reset()
       }
     },
     SendScore() {
@@ -175,12 +176,13 @@ export default {
           const currentScoreRef = ref(db, topPath);
           get(currentScoreRef).then((snapshot) => {
             const currentScore = snapshot.val();
+            console.log('Current score:', currentScore);
 
-            // Check if the current score is smaller than the new time
-            if (currentScore - time > 0) {
+            // Check if there is no current score or if the current score is greater than the new time
+            if (currentScore === null || currentScore < time) {
               // Update the value under the "highscores" subfolder
               set(currentScoreRef, time).then(() => {
-                // Data added successfully
+                console.log('Highscore updated successfully');
               }).catch((error) => {
                 console.error('Error updating data:', error);
               });
@@ -188,6 +190,7 @@ export default {
           }).catch((error) => {
             console.error('Error retrieving data:', error);
           });
+
         }
       }
     },
