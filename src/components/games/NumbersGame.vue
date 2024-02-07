@@ -49,7 +49,7 @@
 
   <HighscoreComp :scoreTitle='scoreTitle' :userScoresPath="userPath" :databasePath="dbPath" :resetFunction="reset"
     :score="score" :scoreLabel="label" :sortWay="highToLow" :buttonDisable="resetButtonState"
-    :buttonText="resetButtonText" :buttonFunction="reset">
+    :buttonText="resetButtonText" :buttonFunction="reset" :helpText="howToPlay">
   </HighscoreComp>
 </template>
   
@@ -58,6 +58,8 @@ import TitleVue from '../extra/Title.vue';
 import HighscoreComp from './HighscoreComp.vue';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getDatabase, ref, onValue, set, remove, get } from 'firebase/database';
+import helpText from '../../data/txtFiles/NumbersGameHowTo.md?raw';
+
 
 const db = getDatabase();
 const auth = getAuth();
@@ -85,6 +87,7 @@ export default {
       timer: null,
       intervalTime: 1000,
       gameover: false,
+      howToPlay: helpText,
     };
   },
   components: {
@@ -267,7 +270,6 @@ export default {
     },
     onKeyDown(event) {
       // Handle the keydown event
-      console.log(`Key pressed: ${event.key}`);
       if (event.key == 'Enter') {
 
         if (this.gameover) {
