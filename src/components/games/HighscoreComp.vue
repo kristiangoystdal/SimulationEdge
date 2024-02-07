@@ -2,6 +2,15 @@
   <div id="other">
     <div id="otherbox1">
       <div id="user">
+        <v-tooltip text="How to play">
+          <template v-slot:activator="{ props }">
+            <font-awesome-icon v-bind="props" :icon="['far', 'circle-question']" id="corner-button" size="2xl"
+              @click="dialog = true" />
+          </template>
+        </v-tooltip>
+
+
+
         <div id="timer">{{ scoreTitle }}: {{ score }} {{ scoreLabel }}</div>
         <div id="done-text" v-if="done">{{ doneText }}</div>
         <v-btn v-if="buttonDisable" id="reset-button" @click="buttonFunction">
@@ -64,11 +73,24 @@
       </div>
     </div>
   </div>
+
+  <v-dialog v-model="dialog" width="auto">
+    <v-card>
+      <!-- Apply style to set width to 90% and center the content -->
+      <v-card-text style="width: 90%; margin: auto;" v-html="sanitizedMarkdown"></v-card-text>
+      <v-card-actions>
+        <v-btn color="primary" block @click="dialog = false">Close Dialog</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getDatabase, ref, onValue } from 'firebase/database';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
+
 
 const db = getDatabase();
 const auth = getAuth();
@@ -85,6 +107,7 @@ export default {
       userScores: {},
       noscores: false,
       username: {},
+      dialog: false,
     };
   },
   props: {
@@ -97,6 +120,8 @@ export default {
     score: Number,
     scoreLabel: String,
     sortWay: Boolean,
+    resetFunction: Function, // Corrected typo here
+    helpText: String,
   },
   created() {
     const userIDRef = ref(db, `/username`);
@@ -204,7 +229,20 @@ export default {
     },
     verifiedEmail() {
       return auth.currentUser.emailVerified;
-    }
+    },
+    sanitizedMarkdown() {
+      const rawHtml = marked(this.helpText);
+      const sanitizedHtml = DOMPurify.sanitize(rawHtml);
+
+      // Add line breaks before every <p> paragraph
+      let formattedHtml = sanitizedHtml.replace(/<p/g, '<br><p').replace(/<h2/g, '<br><h2');
+
+      // Indent list items by one step
+      formattedHtml = formattedHtml.replace(/<li>/g, '<li style="margin-left: 20px;">');
+
+      return formattedHtml;
+    },
+
   },
 };
 </script>
@@ -213,6 +251,11 @@ export default {
 * {
   margin: 0;
   padding: 0;
+}
+
+#user {
+  position: relative;
+  /* Needed to position the child elements absolutely */
 }
 
 @media (min-width: 769px) {
@@ -246,6 +289,13 @@ export default {
     text-align: center;
     border-radius: 20px;
     background-color: bisque;
+  }
+
+  #corner-button {
+    position: absolute;
+    top: 1vw;
+    left: 1vw;
+    z-index: 10;
   }
 
   #highscoreBoard {
@@ -391,6 +441,13 @@ export default {
     background-color: bisque;
   }
 
+  #corner-button {
+    position: absolute;
+    top: 3vw;
+    left: 3vw;
+    z-index: 10;
+  }
+
   #highscoreBoard {
     width: 100%;
     height: auto;
@@ -507,4 +564,5 @@ export default {
   li {
     list-style: decimal;
   }
-}</style>
+}
+</style>
