@@ -295,7 +295,7 @@ export default {
     position: absolute;
     top: 1vw;
     left: 1vw;
-    z-index: 10;
+    z-index: 0;
   }
 
   #highscoreBoard {
@@ -445,7 +445,7 @@ export default {
     position: absolute;
     top: 3vw;
     left: 3vw;
-    z-index: 10;
+    z-index: 1;
   }
 
   #highscoreBoard {
