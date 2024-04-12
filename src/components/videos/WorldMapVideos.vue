@@ -38,6 +38,7 @@
 <script>
   import L from 'leaflet'
   import 'leaflet/dist/leaflet.css'
+  import markerIcon from '../../assets/photos/marker-icon.png'
   import TitleVue from '../extra/Title.vue'
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
@@ -155,6 +156,15 @@
         this.tileLayer.addTo(this.map)
       },
       addMarkers() {
+        // Define the custom icon
+        const customIcon = L.icon({
+          iconUrl: markerIcon, // Adjust the path to your marker icon
+          iconSize: [25, 41], // Size of the icon
+          iconAnchor: [12, 41], // Point of the icon which will correspond to marker's location
+          popupAnchor: [1, -34], // Point from which the popup should open relative to the iconAnchor
+          shadowSize: [41, 41] // Size of the shadow
+        })
+
         this.locations.forEach(location => {
           // Start the grid container for images with display: grid; and define the grid template to have two columns
           let imagesGridHtml =
@@ -165,8 +175,8 @@
             .map(
               (image, index) =>
                 `<div style="width: 200px; height: auto; text-align: center; margin: auto;">
-            <img src="${image}" alt="${location.name}" style="width: 100%; height: auto; cursor: pointer;" onclick="window.dispatchEvent(new CustomEvent('open-video', { detail: '${location.videos[index]}' }))" />
-          </div>`
+                      <img src="${image}" alt="${location.name}" style="width: 100%; height: auto; cursor: pointer;" onclick="window.dispatchEvent(new CustomEvent('open-video', { detail: '${location.videos[index]}' }))" />
+                  </div>`
             )
             .join('')
 
@@ -175,18 +185,19 @@
 
           // Include the location name and the grid of images in the popup content
           const popupContent = `
-      <div style="text-align: center; margin-bottom: 10px;">
-        <strong>${location.name}</strong>
-      </div>
-      ${imagesGridHtml}
-    `
+              <div style="text-align: center; margin-bottom: 10px;">
+                  <strong>${location.name}</strong>
+              </div>
+              ${imagesGridHtml}
+          `
 
-          // Creating the marker and binding the popup with the content
-          L.marker(location.coords)
+          // Creating the marker with the custom icon and binding the popup with the content
+          L.marker(location.coords, { icon: customIcon })
             .addTo(this.map)
             .bindPopup(popupContent, { maxWidth: 420 }) // Adjust maxWidth to accommodate 2 images side by side including the gap
         })
       },
+
       handleOpenVideo(event) {
         // This method will be triggered when an image is clicked
         this.selectedVideo = event.detail // The video URL passed from the button click
