@@ -312,6 +312,7 @@
     max-width: 1000px;
     width: 90%;
     margin: auto;
+    z-index: 1;
   }
 
   @media (min-width: 769px) {
