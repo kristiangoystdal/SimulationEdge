@@ -1,18 +1,6 @@
 <template>
-  <div>
-    <div v-if="model">
-      <VideoGallery></VideoGallery>
-    </div>
-    <div v-else>
-      <WorldMapVideos></WorldMapVideos>
-    </div>
-
-    <div class="switch-container">
-      <span>World Map Videos</span>
-      <v-switch v-model="model" hide-details inset></v-switch>
-      <span>Video Gallery</span>
-    </div>
-  </div>
+  <!-- <VideoGallery></VideoGallery> -->
+  <WorldMapVideos></WorldMapVideos>
 </template>
 
 <script>
