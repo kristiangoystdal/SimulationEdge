@@ -2,14 +2,35 @@
   <div>
     <TitleVue :title="pageTitle"></TitleVue>
     <div id="map" style="height: 400px"></div>
-  </div>
 
-  <div v-if="isVisible" class="overlay" @click="overlayClick">
-    <div class="video-container">
-      <video :src="selectedVideo" controls autoplay></video>
-      <button class="close-btn" @click="hide">
-        <font-awesome-icon icon="times" />
-      </button>
+    <div id="gallery">
+      <v-container>
+        <v-row>
+          <v-col
+            v-for="(item, index) in galleryItems"
+            :key="`gallery-item-${index}`"
+            cols="6"
+            sm="6"
+            md="3"
+          >
+            <img
+              :src="item.image"
+              @click="openVideo(item.video)"
+              alt=""
+              class="gallery-image"
+            />
+          </v-col>
+        </v-row>
+      </v-container>
+    </div>
+
+    <div v-if="isVisible" class="overlay" @click="overlayClick">
+      <div class="video-container">
+        <video :src="selectedVideo" controls autoplay></video>
+        <button class="close-btn" @click="hide">
+          <font-awesome-icon icon="times" />
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -92,12 +113,14 @@
             videos: [SveitsItaliaVideo],
             coords: [41.8719, 12.5674]
           }
-        ]
+        ],
+        galleryItems: []
       }
     },
     mounted() {
       this.initMap()
       this.addMarkers()
+      this.flattenGalleryItems()
 
       window.addEventListener('open-video', event => {
         this.selectedVideo = event.detail // The video URL passed from the button click
@@ -131,7 +154,6 @@
 
         this.tileLayer.addTo(this.map)
       },
-
       addMarkers() {
         this.locations.forEach(location => {
           // Start the grid container for images with display: grid; and define the grid template to have two columns
@@ -165,6 +187,15 @@
             .bindPopup(popupContent, { maxWidth: 420 }) // Adjust maxWidth to accommodate 2 images side by side including the gap
         })
       },
+      handleOpenVideo(event) {
+        // This method will be triggered when an image is clicked
+        this.selectedVideo = event.detail // The video URL passed from the button click
+        this.show()
+      },
+      openVideo(videoUrl) {
+        this.selectedVideo = videoUrl
+        this.show()
+      },
       overlayClick(event) {
         // Check if the click is outside the video container
         if (event.target.classList.contains('overlay')) {
@@ -176,12 +207,34 @@
       },
       hide() {
         this.isVisible = false
+        this.selectedVideo = null // Clear the video source
+      },
+      flattenGalleryItems() {
+        this.galleryItems = this.locations.flatMap(location =>
+          location.images.map((image, index) => ({
+            image: image,
+            video: location.videos[index] || ''
+          }))
+        )
       }
     }
   }
 </script>
 
 <style scoped>
+  .images-flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Adjust gap between images */
+  }
+
+  .flex-image {
+    flex: 1 0 auto;
+    max-width: 100%; /* Adjust based on desired number of images per row within a slot */
+    height: auto;
+    cursor: pointer;
+  }
+
   .overlay {
     position: fixed;
     top: 0;
@@ -242,6 +295,13 @@
   img {
     width: 100%;
     height: auto;
+  }
+
+  #gallery {
+    width: 1000px;
+    max-width: 90%;
+    margin: auto;
+    padding-top: 5vw;
   }
 
   #map {
